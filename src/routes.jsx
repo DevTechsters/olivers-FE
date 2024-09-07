@@ -3,12 +3,14 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider ,Navigate} from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import { useAuth } from './auth/AuthContext';
+import { useSelector } from 'react-redux';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
 
 const ProtectedRoute = ({ element }) => {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useSelector((store)=>store.auth.isAuthenticated)
+
+  console.log(isAuthenticated )
 
   return isAuthenticated ? element : <Navigate to="/" />;
 };

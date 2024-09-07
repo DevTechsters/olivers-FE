@@ -1,15 +1,24 @@
 // src/LoginPage.js
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/authSlice';
+
 
 const LoginPage = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
+    dispatch(login({email}));
+    navigate("/home")
     console.log('Email:', email);
     console.log('Password:', password);
+    
   };
 
   return (
