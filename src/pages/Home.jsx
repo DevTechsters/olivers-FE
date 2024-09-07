@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <Button variant="contained">Contained</Button>
+      <Button variant="contained"></Button>
     </>
   )
 }
