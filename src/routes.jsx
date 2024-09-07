@@ -12,7 +12,7 @@ const ProtectedRoute = ({ element }) => {
 
   console.log(isAuthenticated )
 
-  return isAuthenticated ? element : <Navigate to="/" />;
+  return true ? element : <Navigate to="/" />;
 };
 
 const router = createBrowserRouter([

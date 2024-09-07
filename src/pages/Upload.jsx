@@ -1,9 +1,76 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Button from '@mui/material/Button';
+import Header from '../components/Header';
 
-function Upload() {
+const FileUpload = () => {
+  const [file, setFile] = useState(null);
+  const [uploading,setUploading]=useState(false)
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
+    onDrop: (acceptedFiles) => {
+      setFile(acceptedFiles[0]);
+    },
+  });
+
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || selectedFile.type === 'application/vnd.ms-excel')) {
+      setFile(selectedFile);
+    } else {
+      alert('Please select a valid Excel file.');
+    }
+  };
+
+  const handleUpload=()=>{
+
+  }
+
   return (
-    <div>Upload</div>
-  )
-}
+    <>
+    <Header/>
+    <div className='flex justify-center items-center min-h-screen '>
+      <div className="p-6 rounded-lg shadow-lg w-2/4">
+        <h3 className="text-2xl font-bold m-4">Upload File</h3>
+        <div className='flex items-center justify-center'>
+        <div
+          {...getRootProps({ className: 'dropzone' })}
+          style={{
+            border: '2px dashed #cccccc',
+            borderRadius: '4px',
+            padding: '20px',
+            textAlign: 'center',
+            cursor: 'pointer',
+            backgroundColor: '#f9f9f9',
+            width:'90%',
+            
+          }}
+        >
+          <input
+            {...getInputProps()}
+            type="file"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <CloudUploadIcon/>
+          <p>Drag & drop an Excel file here, or click to select one</p>
+          {file && <p>Selected file: {file.name}</p>}
+        </div>
+        </div>
+        <div className=' m-2 mt-4 flex justify-end space-x-2'>
+          <Button color='dark' variant="outlined">cancel</Button>
+          <Button  variant="contained">upload</Button>
+        </div>
+        {error && <p className="mt-4 text-red-500">{error}</p>}
+        {success && <p className="mt-4 text-green-500">{success}</p>}
+      </div>
+    </div>
+    </>
+  );
+};
 
-export default Upload
+export default FileUpload;
