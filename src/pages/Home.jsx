@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Header from '../components/Header'
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -6,8 +6,10 @@ import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import Loader from '../components/Loader';
 
 export default function Home() {
+  const [loading,setloading]=useState(true)
 
   const handleEditClick = (id) => () => {
   };
@@ -75,7 +77,7 @@ export default function Home() {
 
   return (
     <>
-      <Header />
+      {loading?<Loader/>:<><Header />
       <div class="flex justify-end my-5 mr-10">
         <button class="bg-blue-500 text-white py-2 px-4 rounded">
           <FileDownloadIcon></FileDownloadIcon> Export
@@ -99,7 +101,7 @@ export default function Home() {
           className='p-4'
         />
       </Box>
-      </div>
+      </div></>}
     </>
   )
 }
