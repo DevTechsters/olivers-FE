@@ -2,16 +2,17 @@ import React from 'react'
 import Header from '../components/Header'
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import { DataGrid ,GridActionsCellItem} from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 export default function Home() {
 
   const handleEditClick = (id) => () => {
   };
 
-  
+
 
   const handleDeleteClick = (id) => () => {
   };
@@ -65,18 +66,22 @@ export default function Home() {
     },
   ];
 
-  const rows=[
+  const rows = [
     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 14 },
     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 31 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
+    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
   ]
- 
+
 
   return (
     <>
       <Header />
-      <Button variant="contained">Export</Button>
-
+      <div class="flex justify-end my-5 mr-10">
+        <button class="bg-blue-500 text-white py-2 px-4 rounded">
+          <FileDownloadIcon></FileDownloadIcon> Export
+        </button>
+      </div>
+      <div className='m-4 bg-white'>
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
           rows={rows}
@@ -91,8 +96,10 @@ export default function Home() {
           pageSizeOptions={[5]}
           checkboxSelection
           disableRowSelectionOnClick
+          className='p-4'
         />
       </Box>
+      </div>
     </>
   )
 }
