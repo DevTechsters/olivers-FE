@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import Header from '../components/Header'
 import Button from '@mui/material/Button';
+import SearchIcon from '@mui/icons-material/Search';
+import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 export default function Home() {
   const [loading, setloading] = useState(false)
@@ -117,13 +120,26 @@ export default function Home() {
   return (
     <>
       {loading ? <Loader /> : <><Header />
-        <div class="flex justify-end my-5 mr-10">
-          <button class="bg-blue-500 text-white py-2 px-4 rounded">
+        <div class="flex justify-between my-4 mr-10">
+          <div className='flex space-x-2 mx-6'>
+            <div className=' bg-white border rounded-lg border-gray-300 '>
+              <IconButton aria-label="filter">
+                <FilterAltIcon />
+              </IconButton>
+            </div>
+            <div className='flex space-x-1  bg-white border rounded-lg border-gray-300 '>
+              <SearchIcon className='m-2'/>
+              <input className='h-full focus:outline-none' type='text' placeholder='Search...'/>
+            </div>
+            
+          </div>
+          <button class="bg-blue-500 text-white  px-4 rounded">
             <FileDownloadIcon></FileDownloadIcon> Export
           </button>
         </div>
         <div className='m-4 bg-white'>
-          <Box sx={{ height: '78vh', width: '100%' }}>
+
+          <Box sx={{ height: '77vh', width: '100%' }}>
 
             <DataGrid
               rows={rows}
