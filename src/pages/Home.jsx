@@ -9,7 +9,11 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
 
 export default function Home() {
-  const [loading,setloading]=useState(true)
+  const [loading, setloading] = useState(false)
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 5,
+    page: 0,
+  });
 
   const handleEditClick = (id) => () => {
   };
@@ -20,27 +24,62 @@ export default function Home() {
   };
 
   const columns = [
-    { field: 'id', headerName: 'INVOICE', width: 90 },
+    { field: 'brand', headerName: 'Brand' },
     {
       field: 'firstName',
-      headerName: 'CUSTOMER',
+      headerName: 'SO',
     },
     {
       field: 'lastName',
-      headerName: 'STATUS',
+      headerName: 'BEAT',
     },
     {
       field: 'age',
-      headerName: 'AMOUNT',
-      type: 'number',
+      headerName: 'Bill No',
     },
     {
       field: 'fullName',
-      headerName: 'PAYMENT TYPE',
+      headerName: 'Bill Date',
     },
     {
       field: 'fullName',
-      headerName: 'UPDATED BY',
+      headerName: 'Retailer Name',
+    },
+    {
+      field: '',
+      headerName: 'Invoice Amount',
+    },
+    {
+      field: '',
+      headerName: 'Received (CHQ+ GPAY)',
+    },
+    {
+      field: '',
+      headerName: 'Cash Discount',
+    },
+    {
+      field: '',
+      headerName: 'Damage',
+    },
+    {
+      field: '',
+      headerName: 'Claim',
+    },
+    {
+      field: '',
+      headerName: 'CR Note',
+    },
+    {
+      field: '',
+      headerName: 'Delivery Status',
+    },
+    {
+      field: '',
+      headerName: 'Tally Status',
+    },
+    {
+      field: '',
+      headerName: 'Balance',
     },
     {
       field: 'actions',
@@ -77,31 +116,27 @@ export default function Home() {
 
   return (
     <>
-      {loading?<Loader/>:<><Header />
-      <div class="flex justify-end my-5 mr-10">
-        <button class="bg-blue-500 text-white py-2 px-4 rounded">
-          <FileDownloadIcon></FileDownloadIcon> Export
-        </button>
-      </div>
-      <div className='m-4 bg-white'>
-      <Box sx={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          className='p-4'
-        />
-      </Box>
-      </div></>}
+      {loading ? <Loader /> : <><Header />
+        <div class="flex justify-end my-5 mr-10">
+          <button class="bg-blue-500 text-white py-2 px-4 rounded">
+            <FileDownloadIcon></FileDownloadIcon> Export
+          </button>
+        </div>
+        <div className='m-4 bg-white'>
+          <Box sx={{ height: '78vh', width: '100%' }}>
+
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              pageSizeOptions={[10, 100, 1000]}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              pagination
+              checkboxSelection
+              disableRowSelectionOnClick
+            />
+          </Box>
+        </div></>}
     </>
   )
 }
