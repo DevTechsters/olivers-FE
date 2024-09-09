@@ -33,8 +33,8 @@ const FileUpload = () => {
   return (
     <>
     <Header/>
-    <div className='flex justify-center items-center min-h-screen'>
-      <div className="p-6 rounded-lg shadow-lg w-2/4 bg-white">
+    <div className='flex justify-center items-center min-h-screen '>
+      <div className="p-6 rounded-lg shadow-lg w-2/4">
         <h3 className="text-2xl font-bold m-4">Upload File</h3>
         <div className='flex items-center justify-center'>
         <div
