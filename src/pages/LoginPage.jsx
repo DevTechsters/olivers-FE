@@ -27,7 +27,7 @@ const LoginPage = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="username">
               Username
             </label>
             <input
