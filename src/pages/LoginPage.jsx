@@ -7,16 +7,16 @@ import { login } from '../redux/authSlice';
 
 const LoginPage = () => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
-    dispatch(login({email}));
+    dispatch(login({username}));
     navigate("/home")
-    console.log('Email:', email);
+    console.log('Username:', username);
     console.log('Password:', password);
     
   };
@@ -27,14 +27,14 @@ const LoginPage = () => {
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="email">
-              Email
+            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="username">
+              Username
             </label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               required
             />
