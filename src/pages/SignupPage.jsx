@@ -5,7 +5,6 @@ const SignupPage = () => {
   const [username, setUsername] = useState('');
   const [passkey, setPasskey] = useState('');
   const [password, setPassword] = useState('');
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
