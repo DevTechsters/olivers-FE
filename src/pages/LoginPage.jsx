@@ -1,30 +1,50 @@
-// src/LoginPage.js
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/authSlice';
-
 
 const LoginPage = () => {
   const dispatch = useDispatch();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    dispatch(login({username}));
-    navigate("/home")
-    console.log('Username:', username);
-    console.log('Password:', password);
-    
+    try {
+      const response = await axios.post('/api/users/signin', {
+        username,
+        password,
+      });
+
+      // Successful login
+      dispatch(login({ username }));
+      navigate("/home");
+    } catch (error) {
+      if (error.response) {
+        // Server responded with a status other than 2xx
+        setErrorMessage(error.response.data || 'Login failed');
+      } else if (error.request) {
+        // Request was made but no response received
+        setErrorMessage('No response received');
+      } else {
+        // Something happened in setting up the request
+        setErrorMessage('Error setting up the request');
+      }
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
+            {errorMessage}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="username">
