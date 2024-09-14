@@ -4,3 +4,7 @@ body {
   box-sizing: border-box;
   background-color: #E5E9F2;
 }
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
