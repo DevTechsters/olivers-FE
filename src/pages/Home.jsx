@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Button from '@mui/material/Button';
 import SearchIcon from '@mui/icons-material/Search';
@@ -10,14 +10,15 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import axios from 'axios';
 
 export default function Home() {
-  const [loading, setloading] = useState(false)
+  const [data, setData] = useState([]);
   const [paginationModel, setPaginationModel] = useState({
-    pageSize: 5,
     page: 0,
+    pageSize: 10,
   });
-
+  const [loading, setLoading] = useState(false);
   const handleEditClick = (id) => () => {
   };
 
@@ -27,61 +28,105 @@ export default function Home() {
   };
 
   const columns = [
-    { field: 'brand', headerName: 'Brand' },
+    { field: 'Brand', headerName: 'Brand' },
     {
-      field: 'firstName',
-      headerName: 'SO',
+      field: 'SalespersonName',
+      headerName: 'Salesperson Name',
     },
     {
-      field: 'lastName',
+      field: 'Beat',
       headerName: 'BEAT',
     },
     {
-      field: 'age',
+      field:"Day",
+      headerName:"Day"
+    },
+    {
+      field:"day_count",
+      headerName:"Day count"
+    },
+    {
+      field: 'Bill_Number',
       headerName: 'Bill No',
     },
     {
-      field: 'fullName',
+      field: 'Billdate',
       headerName: 'Bill Date',
     },
     {
-      field: 'fullName',
+      field: 'RetailerName',
       headerName: 'Retailer Name',
     },
     {
-      field: '',
+      field:"Rec",
+      headerName:"Rec"
+    },
+    {
+      field: 'InvoicedAmount',
       headerName: 'Invoice Amount',
     },
     {
-      field: '',
-      headerName: 'Received (CHQ+ GPAY)',
+      field: 'Amount Received',
+      headerName: 'amount_received',
     },
     {
-      field: '',
+      field:"Cheque",
+      headerName:"Cheque"
+    },
+    {
+      field: 'CashDiscount',
       headerName: 'Cash Discount',
     },
     {
-      field: '',
+      field: 'Damage',
       headerName: 'Damage',
     },
     {
-      field: '',
+      field: 'Claim',
       headerName: 'Claim',
     },
     {
-      field: '',
+      field: 'CreditNote',
       headerName: 'CR Note',
     },
     {
-      field: '',
+      field:"Gpay",
+      headerName:"Gpay"
+    },
+    {
+      field:"part_payment",
+      headerName:"Part Payment"
+    },
+    {
+      field: 'delivery',
       headerName: 'Delivery Status',
     },
     {
-      field: '',
+      field:"Cancel",
+      headerName:"Cancel"
+    },
+    {
+      field:"createdBy",
+      headerName:"Created By"
+    },
+    {
+      field:"createdAt",
+      headerName:"Created At"
+    },
+    {
+      field:"Updated By",
+      headerName:"updatedBy"
+    },
+    {
+      field:"updatedAt",
+      headerName:"Updated At"
+    },
+    {
+      field: 'tally_status',
       headerName: 'Tally Status',
     },
     {
-      field: '',
+      field: 'Balance',
       headerName: 'Balance',
     },
     {
@@ -110,12 +155,163 @@ export default function Home() {
     },
   ];
 
-  const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 14 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 31 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 31 },
-  ]
+  const rows =[
+    {
+      id:1,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id:2,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id:3,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id:4,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id:5,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    }
+  ] 
 
+
+  useEffect(()=>{
+    const response= axios.get()
+  },[paginationModel])
 
   return (
     <>
@@ -128,26 +324,27 @@ export default function Home() {
               </IconButton>
             </div>
             <div className='flex space-x-1  bg-white border rounded-lg border-gray-300 '>
-              <SearchIcon className='m-2'/>
-              <input className='h-full focus:outline-none' type='text' placeholder='Search...'/>
+              <SearchIcon className='m-2' />
+              <input className='h-full focus:outline-none' type='text' placeholder='Search...' />
             </div>
-            
+
           </div>
           <button class="bg-blue-500 text-white  px-4 rounded">
             <FileDownloadIcon></FileDownloadIcon> Export
           </button>
         </div>
         <div className='m-4 bg-white'>
-
           <Box sx={{ height: '77vh', width: '100%' }}>
-
             <DataGrid
               rows={rows}
               columns={columns}
-              pageSizeOptions={[10, 100, 1000]}
+              
+              loading={loading}
+              rowCount={1000}
+              pageSizeOptions={[10,50,100]}
               paginationModel={paginationModel}
+              paginationMode="server"
               onPaginationModelChange={setPaginationModel}
-              pagination
               checkboxSelection
               disableRowSelectionOnClick
             />
