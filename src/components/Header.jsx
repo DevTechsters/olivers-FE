@@ -1,8 +1,16 @@
 import React from 'react'
 import Button from '@mui/material/Button';
 import { NavLink } from 'react-router-dom';
-
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 function Header() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const logout=()=>{
+    dispatch(logout());
+    navigate("/");
+  }
+
   return (
    <nav className='z-50'>
       <div className='h-8vh flex justify-between items-center py-3 px-14  border-b '>
@@ -13,7 +21,7 @@ function Header() {
           <ul className='flex gap-8 mr-16 text-[18px]'>
             <li className='hover:border-b-4'><NavLink to="/home">Home</NavLink></li>
             <li className='hover:border-b-4'><NavLink to="/upload">Upload</NavLink></li>
-            <li><Button variant="contained">Logout</Button></li>
+            <li><Button variant="contained" onClick={logout}>Logout</Button></li>
           </ul>
         </div>
       </div>

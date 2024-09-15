@@ -15,6 +15,7 @@ import Select from 'react-select';
 import moment from 'moment';
 import { comment } from 'postcss';
 import { toast } from 'react-toastify';
+import _ from 'lodash';
 
 
 export default function Home() {
@@ -55,6 +56,11 @@ export default function Home() {
     })
     setPaymentMethod("")
     setEditPayload([])
+    setErrors({
+      receivedAmount:'',
+      date:"",
+      paymentMethod:''
+    })
   }
 
   const toggleFilter =()=>{
@@ -106,16 +112,24 @@ export default function Home() {
         return;
     }  
     let username=sessionStorage.getItem("user")
-    let arr=BillsHistory
+    let arr=_.cloneDeep(BillsHistory)
     arr.push({...addBill,paymentMethod:paymentMethod,createdBy:username})
-    setAddbill(arr)
-    let payloadArr=editPayload
+    setBillsHistory(arr)
+    let payloadArr=_.cloneDeep(editPayload)
     payloadArr.push({...addBill,paymentMethod:paymentMethod,createdBy:username})
     setEditPayload(payloadArr)
+    setAddbill({
+      receivedAmount:0,
+      comments:"",
+      date:""
+    })
     toast.info("Added Succesfully")
+    
   }
 
   const saveEdit=async()=>{
+    console.log(editPayload);
+    
     try{
       await axios.post("/api",editPayload)
       toast.info("Saved successfully")
@@ -447,12 +461,12 @@ export default function Home() {
                   {/* Modal content for editing */}
                   <Col>
                     <Label>Date *</Label>
-                    <Input id='date' type="date" onChange={handleAddbill} invalid={!!errors.date} />
+                    <Input id='date' value={addBill.date} type="date" onChange={handleAddbill} invalid={!!errors.date} />
                     {errors.date && <FormFeedback>{errors.date}</FormFeedback>}
                   </Col>
                   <Col>
                     <Label>Comments</Label>
-                    <Input id='comments' type="textarea" onChange={handleAddbill} />
+                    <Input id='comments' type="textarea" value={addBill.comments} onChange={handleAddbill} />
                   </Col>
                   <Col>
                     <Label>Payment Method *</Label>
@@ -468,7 +482,7 @@ export default function Home() {
                   </Col>
                   <Col>
                     <Label>Amount *</Label>
-                    <Input id='receivedAmount' type="number" min="1" onChange={handleAddbill}  invalid={!!errors.receivedAmount}/>
+                    <Input id='receivedAmount' value={addBill.receivedAmount} type="number" min="1" onChange={handleAddbill}  invalid={!!errors.receivedAmount}/>
                     {errors.receivedAmount && <FormFeedback>{errors.receivedAmount}</FormFeedback>}
                   </Col>
                   <Col>
