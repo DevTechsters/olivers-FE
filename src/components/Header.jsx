@@ -3,10 +3,11 @@ import Button from '@mui/material/Button';
 import { NavLink } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../redux/authSlice';
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const logout=()=>{
+  const logoutCall=()=>{
     dispatch(logout());
     navigate("/");
   }
@@ -21,7 +22,7 @@ function Header() {
           <ul className='flex gap-8 mr-16 text-[18px]'>
             <li className='hover:border-b-4'><NavLink to="/home">Home</NavLink></li>
             <li className='hover:border-b-4'><NavLink to="/upload">Upload</NavLink></li>
-            <li><Button variant="contained" onClick={logout}>Logout</Button></li>
+            <li><Button variant="contained" onClick={logoutCall}>Logout</Button></li>
           </ul>
         </div>
       </div>
