@@ -13,6 +13,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, But
 import axios from 'axios';
 import Select from 'react-select';
 import moment from 'moment';
+import { comment } from 'postcss';
 
 
 export default function Home() {
@@ -25,8 +26,32 @@ export default function Home() {
   const [modal, setModal] = useState(false);
   const [rows, setRows] = useState([]);  // Set state for rows (Bills)
   const [BillsHistory, setBillsHistory] = useState([]);
+  const [addBill,setAddbill]=useState({
+    amount:0,
+    comment:"",
+    date:""
+  })
+  const [paymentMethod,setPaymentMethod]=useState("")
 
-  const toggle = () => setModal(!modal);
+  console.log(addBill,paymentMethod);
+  
+
+  const toggle = () =>{
+    setModal(!modal);
+    setAddbill({
+      amount:0,
+    comment:"",
+    date:""
+    })
+    setPaymentMethod("")
+  }
+  const handleAddbill=(e)=>{
+    setAddbill({...addBill,[e.target.id]:e.target.value})
+  }
+
+  const handlePaymentMethod=(e)=>{
+    setPaymentMethod(e.label)
+  }
 
   const handleEditClick = (id) => () => {
     setModal(true);
@@ -109,6 +134,210 @@ export default function Home() {
     fetchBills();
   }, [paginationModel]);
 
+  // const rows = [
+  //   {
+  //     id: 0,
+  //     BillId: 1,
+  //     Brand: "Chocalate",
+  //     SalespersonName: "Hariii",
+  //     Beat: "PaperMill",
+  //     Day: "Thursday",
+  //     Bill_Number: "FR09876545678",
+  //     Billdate: "24/9/2024",
+  //     day_count: 14,
+  //     RetailerName: "Pandian Stores Super Market",
+  //     Balance: 1000,
+  //     Rec: 100,
+  //     InvoiceAmount: 500,
+  //     amount_received: 100,
+  //     Cheque: 0,
+  //     CashDiscount: 40,
+  //     Damage: 0,
+  //     Claim: 100,
+  //     CreditNote: 100,
+  //     Gpay: 100,
+  //     part_payment: 100,
+  //     delivery: 100,
+  //     Cancel: 100,
+  //     createdBy: "Admin",
+  //     createdAt: "2024-04-26T10:30:00",
+  //     updatedBy: null,
+  //     updatedAt: null,
+  //     tally_status: "completed",
+  //     BillsHistory: [{
+  //       date: "26/4/2024",
+  //       paymentMethod: "Cash, Credit Note",
+  //       receivedAmoun: 200,
+  //       comments: "Paid cash and used credit note",
+  //       createdBy: "Admin",
+  //       createdAt: "2024-04-26T10:30:00",
+  //       updatedBy: null,
+  //       updatedAt: null
+  //     },
+  //     {
+  //       date: "27/4/2024",
+  //       paymentMethod: "Gpay, Part Payment",
+  //       receivedAmount: 150,
+  //       comments: "Part payment through Gpay",
+  //       createdBy: "Admin",
+  //       createdAt: "2024-04-27T11:00:00",
+  //       updatedBy: null,
+  //       updatedAt: null
+  //     },
+  //     {
+  //       date: "27/4/2024",
+  //       paymentMethod: "Gpay, Part Payment",
+  //       receivedAmount: 150,
+  //       comments: "Part payment through Gpay",
+  //       createdBy: "Admin",
+  //       createdAt: "2024-04-27T11:00:00",
+  //       updatedBy: null,
+  //       updatedAt: null
+  //     },
+  //     {
+  //       date: "27/4/2024",
+  //       paymentMethod: "Gpay, Part Payment",
+  //       receivedAmount: 150,
+  //       comments: "Part payment through Gpay",
+  //       createdBy: "Admin",
+  //       createdAt: "2024-04-27T11:00:00",
+  //       updatedBy: null,
+  //       updatedAt: null
+  //     },
+  //     {
+  //       date: "27/4/2024",
+  //       paymentMethod: "Gpay, Part Payment",
+  //       receivedAmount: 150,
+  //       comments: "Part payment through Gpay",
+  //       createdBy: "Admin",
+  //       createdAt: "2024-04-27T11:00:00",
+  //       updatedBy: null,
+  //       updatedAt: null
+  //     },
+  //   ]
+  //   },
+  //   {
+  //     id: 1,
+  //     BillId: 1,
+  //     Brand: "Chocalate",
+  //     SalespersonName: "Hari",
+  //     Beat: "PaperMill",
+  //     Day: "Thursday",
+  //     Bill_Number: "IO09876545678",
+  //     Billdate: "24/9/2024",
+  //     day_count: 14,
+  //     RetailerName: "Pandian Stores Super Market",
+  //     Balance: 1000,
+  //     Rec: 100,
+  //     InvoiceAmount: 500,
+  //     amount_received: 100,
+  //     Cheque: 0,
+  //     CashDiscount: 40,
+  //     Damage: 0,
+  //     Claim: 100,
+  //     CreditNote: 100,
+  //     Gpay: 100,
+  //     part_payment: 100,
+  //     delivery: 100,
+  //     Cancel: 100,
+  //     createdBy: "Admin",
+  //     createdAt: "2024-04-26T10:30:00",
+  //     updatedBy: null,
+  //     updatedAt: null,
+  //     tally_status: "completed"
+  //   },
+  //   {
+  //     id: 2,
+  //     BillId: 1,
+  //     Brand: "Chocalate",
+  //     SalespersonName: "Hari",
+  //     Beat: "PaperMill",
+  //     Day: "Thursday",
+  //     Bill_Number: "FR09876545678",
+  //     Billdate: "24/9/2024",
+  //     day_count: 14,
+  //     RetailerName: "Pandian Stores Super Market",
+  //     Balance: 1000,
+  //     Rec: 100,
+  //     InvoiceAmount: 500,
+  //     amount_received: 100,
+  //     Cheque: 0,
+  //     CashDiscount: 40,
+  //     Damage: 0,
+  //     Claim: 100,
+  //     CreditNote: 100,
+  //     Gpay: 100,
+  //     part_payment: 100,
+  //     delivery: 100,
+  //     Cancel: 100,
+  //     createdBy: "Admin",
+  //     createdAt: "2024-04-26T10:30:00",
+  //     updatedBy: null,
+  //     updatedAt: null,
+  //     tally_status: "completed"
+  //   },
+  //   {
+  //     id: 3,
+  //     BillId: 1,
+  //     Brand: "Chocalate",
+  //     SalespersonName: "Hari",
+  //     Beat: "PaperMill",
+  //     Day: "Thursday",
+  //     Bill_Number: "FR09876545678",
+  //     Billdate: "24/9/2024",
+  //     day_count: 14,
+  //     RetailerName: "Pandian Stores Super Market",
+  //     Balance: 1000,
+  //     Rec: 100,
+  //     InvoiceAmount: 500,
+  //     amount_received: 100,
+  //     Cheque: 0,
+  //     CashDiscount: 40,
+  //     Damage: 0,
+  //     Claim: 100,
+  //     CreditNote: 100,
+  //     Gpay: 100,
+  //     part_payment: 100,
+  //     delivery: 100,
+  //     Cancel: 100,
+  //     createdBy: "Admin",
+  //     createdAt: "2024-04-26T10:30:00",
+  //     updatedBy: null,
+  //     updatedAt: null,
+  //     tally_status: "completed"
+  //   },
+  //   {
+  //     id: 4,
+  //     BillId: 1,
+  //     Brand: "Chocalate",
+  //     SalespersonName: "Hari",
+  //     Beat: "PaperMill",
+  //     Day: "Thursday",
+  //     Bill_Number: "FR09876545678",
+  //     Billdate: "24/9/2024",
+  //     day_count: 14,
+  //     RetailerName: "Pandian Stores Super Market",
+  //     Balance: 1000,
+  //     Rec: 100,
+  //     InvoiceAmount: 500,
+  //     amount_received: 100,
+  //     Cheque: 0,
+  //     CashDiscount: 40,
+  //     Damage: 0,
+  //     Claim: 100,
+  //     CreditNote: 100,
+  //     Gpay: 100,
+  //     part_payment: 100,
+  //     delivery: 100,
+  //     Cancel: 100,
+  //     createdBy: "Admin",
+  //     createdAt: "2024-04-26T10:30:00",
+  //     updatedBy: null,
+  //     updatedAt: null,
+  //     tally_status: "completed"
+  //   }
+  // ]
+
   return (
     <>
       {loading ? (
@@ -156,11 +385,11 @@ export default function Home() {
                   {/* Modal content for editing */}
                   <Col>
                     <Label>Amount</Label>
-                    <Input type="number" min="1" />
+                    <Input id='amount' type="number" min="1" onChange={handleAddbill} />
                   </Col>
                   <Col>
                     <Label>Comments</Label>
-                    <Input type="textarea" />
+                    <Input id='comment' type="textarea" onChange={handleAddbill} />
                   </Col>
                   <Col>
                     <Label>Payment Method</Label>
@@ -170,11 +399,12 @@ export default function Home() {
                         { value: 'Cash', label: 'Cash' },
                         { value: 'Cheque', label: 'Cheque' },
                       ]}
+                      onChange={handlePaymentMethod}
                     />
                   </Col>
                   <Col>
                     <Label>Date</Label>
-                    <Input type="date" />
+                    <Input id='date' type="date" onChange={handleAddbill} />
                   </Col>
                   <Col>
                     <Button color="primary">Add</Button>
