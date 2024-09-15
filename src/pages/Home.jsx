@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table,FormFeedback } from 'reactstrap';
 import axios from 'axios';
 import Select from 'react-select';
 import moment from 'moment';
@@ -40,6 +40,11 @@ export default function Home() {
     option3: null,
   });
   const [editPayload,setEditPayload]=useState([])
+  const [errors, setErrors] = useState({
+    receivedAmount:'',
+    date:"",
+    paymentMethod:''
+  });
 
   const toggle = () =>{
     setModal(!modal);
@@ -75,7 +80,31 @@ export default function Home() {
     // Handle delete action
   };
 
-  const handleAddClick=()=>{    
+  const validateForm = () => {
+    const newErrors = {};
+    if (!addBill.receivedAmount) {
+      newErrors.receivedAmount = 'Amount is required';
+    }
+
+    if (!addBill.date) {
+      newErrors.date = 'Date is required';
+    }
+
+    if(!paymentMethod)
+    {
+      newErrors.paymentMethod="Payment Method is required"
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleAddClick=()=>{  
+    if(!validateForm())
+    {
+      toast.error("Fill mandatory fields")
+        return;
+    }  
     let username=sessionStorage.getItem("user")
     let arr=BillsHistory
     arr.push({...addBill,paymentMethod:paymentMethod,createdBy:username})
@@ -417,15 +446,16 @@ export default function Home() {
                 <Row>
                   {/* Modal content for editing */}
                   <Col>
-                    <Label>Date</Label>
-                    <Input id='date' type="date" onChange={handleAddbill} />
+                    <Label>Date *</Label>
+                    <Input id='date' type="date" onChange={handleAddbill} invalid={!!errors.date} />
+                    {errors.date && <FormFeedback>{errors.date}</FormFeedback>}
                   </Col>
                   <Col>
                     <Label>Comments</Label>
                     <Input id='comments' type="textarea" onChange={handleAddbill} />
                   </Col>
                   <Col>
-                    <Label>Payment Method</Label>
+                    <Label>Payment Method *</Label>
                     <Select
                       options={[
                         { value: 'Gpay', label: 'Gpay' },
@@ -434,10 +464,12 @@ export default function Home() {
                       ]}
                       onChange={handlePaymentMethod}
                     />
+                    {errors.paymentMethod && <FormFeedback>{errors.paymentMethod}</FormFeedback>}
                   </Col>
                   <Col>
-                    <Label>Amount</Label>
-                    <Input id='receivedAmount' type="number" min="1" onChange={handleAddbill} />
+                    <Label>Amount *</Label>
+                    <Input id='receivedAmount' type="number" min="1" onChange={handleAddbill}  invalid={!!errors.receivedAmount}/>
+                    {errors.receivedAmount && <FormFeedback>{errors.receivedAmount}</FormFeedback>}
                   </Col>
                   <Col>
                     <Button color="primary" onClick={handleAddClick}>Add</Button>
