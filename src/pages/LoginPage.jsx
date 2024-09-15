@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/authSlice';
 import { toast } from 'react-toastify';
@@ -81,6 +81,7 @@ const LoginPage = () => {
             Login
           </button>
         </form>
+        <p className='m-1 text-center'>Don't have an account? <Link to="/signup">Signup</Link></p>
       </div>
     </div>
   );
