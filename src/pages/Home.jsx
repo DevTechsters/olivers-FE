@@ -32,9 +32,12 @@ export default function Home() {
     date:""
   })
   const [paymentMethod,setPaymentMethod]=useState("")
-
-  console.log(addBill,paymentMethod);
-  
+  const [filterModal,setFilterModal]=useState(false)
+  const [filterData, setFilterData] = useState({
+    option1: null,
+    option2: null,
+    option3: null,
+  });
 
   const toggle = () =>{
     setModal(!modal);
@@ -45,6 +48,12 @@ export default function Home() {
     })
     setPaymentMethod("")
   }
+
+  const toggleFilter =()=>{
+    setFilterModal(!filterModal)
+  }
+
+
   const handleAddbill=(e)=>{
     setAddbill({...addBill,[e.target.id]:e.target.value})
   }
@@ -348,7 +357,7 @@ export default function Home() {
           <div className="flex justify-between my-4 mr-10">
             <div className="flex space-x-2 mx-6">
               <div className="bg-white border rounded-lg border-gray-300">
-                <IconButton aria-label="filter">
+                <IconButton aria-label="filter" onClick={toggleFilter}>
                   <FilterAltIcon />
                 </IconButton>
               </div>
@@ -377,8 +386,8 @@ export default function Home() {
             </Box>
           </div>
           {/* Modal for edit functionality */}
-          <Modal isOpen={modal} toggle={toggle} centered={true} size="xl">
-            <ModalHeader toggle={toggle}>{editData.billno}</ModalHeader>
+          <Modal isOpen={modal} toggle={toggleFilter} centered={true} size="xl">
+            <ModalHeader toggle={toggleFilter}>{editData.billno}</ModalHeader>
             <ModalBody>
               <div className="m-2 p-2">
                 <Row>
@@ -448,6 +457,36 @@ export default function Home() {
               <Button onClick={toggle}>Cancel</Button>
             </ModalFooter>
           </Modal>
+          <Modal isOpen={filterModal} toggle={toggle} centered={true} size="xl">
+            <ModalHeader toggle={toggle}>Filter</ModalHeader>
+            <ModalBody>
+              <div className="m-2 p-2">
+                <Row>
+                  <Label>Salesperson Name</Label>
+                  <Select />
+                </Row>
+                <Row>
+                    <Label>Retailer Name</Label>
+                    <Select />
+                </Row>
+                <Row>
+                  <Col>
+                      <Label>From</Label>
+                      <Input type='date' />
+                  </Col>
+                  <Col>
+                      <Label>To</Label>
+                      <Input type='date' />
+                  </Col>
+                </Row>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary">Filter</Button>
+              <Button onClick={toggleFilter}>Cancel</Button>
+            </ModalFooter>
+          </Modal>
+
         </>
       )}
     </>
