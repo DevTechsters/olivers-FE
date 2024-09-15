@@ -24,7 +24,7 @@ export default function Home() {
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [rows, setRows] = useState([]);  // Set state for rows (Bills)
+  // const [rows, setRows] = useState([]);  // Set state for rows (Bills)
   const [BillsHistory, setBillsHistory] = useState([]);
   const [addBill,setAddbill]=useState({
     amount:0,
@@ -122,230 +122,230 @@ export default function Home() {
     { field: 'tallyStatus', headerName: 'Tally Status', width: 130 },
   ];
 
-  useEffect(() => {
-    const fetchBills = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
-        );
-        const billsData = response.data.Bills.map((bill, index) => ({
-          id: index,  // Assign an ID for each row
-          ...bill,
-        }));
-        setRows(billsData);
-      } catch (error) {
-        console.error('Error fetching bills:', error);
-      }
-      setLoading(false);
-    };
+  // useEffect(() => {
+  //   const fetchBills = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await axios.get(
+  //         `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
+  //       );
+  //       const billsData = response.data.Bills.map((bill, index) => ({
+  //         id: index,  // Assign an ID for each row
+  //         ...bill,
+  //       }));
+  //       setRows(billsData);
+  //     } catch (error) {
+  //       console.error('Error fetching bills:', error);
+  //     }
+  //     setLoading(false);
+  //   };
 
-    fetchBills();
-  }, [paginationModel]);
+  //   fetchBills();
+  // }, [paginationModel]);
 
-  // const rows = [
-  //   {
-  //     id: 0,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hariii",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed",
-  //     BillsHistory: [{
-  //       date: "26/4/2024",
-  //       paymentMethod: "Cash, Credit Note",
-  //       receivedAmoun: 200,
-  //       comments: "Paid cash and used credit note",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-26T10:30:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //   ]
-  //   },
-  //   {
-  //     id: 1,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "IO09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 2,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 3,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 4,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   }
-  // ]
+  const rows = [
+    {
+      id: 0,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hariii",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed",
+      BillsHistory: [{
+        date: "26/4/2024",
+        paymentMethod: "Cash, Credit Note",
+        receivedAmoun: 200,
+        comments: "Paid cash and used credit note",
+        createdBy: "Admin",
+        createdAt: "2024-04-26T10:30:00",
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        date: "27/4/2024",
+        paymentMethod: "Gpay, Part Payment",
+        receivedAmount: 150,
+        comments: "Part payment through Gpay",
+        createdBy: "Admin",
+        createdAt: "2024-04-27T11:00:00",
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        date: "27/4/2024",
+        paymentMethod: "Gpay, Part Payment",
+        receivedAmount: 150,
+        comments: "Part payment through Gpay",
+        createdBy: "Admin",
+        createdAt: "2024-04-27T11:00:00",
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        date: "27/4/2024",
+        paymentMethod: "Gpay, Part Payment",
+        receivedAmount: 150,
+        comments: "Part payment through Gpay",
+        createdBy: "Admin",
+        createdAt: "2024-04-27T11:00:00",
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        date: "27/4/2024",
+        paymentMethod: "Gpay, Part Payment",
+        receivedAmount: 150,
+        comments: "Part payment through Gpay",
+        createdBy: "Admin",
+        createdAt: "2024-04-27T11:00:00",
+        updatedBy: null,
+        updatedAt: null
+      },
+    ]
+    },
+    {
+      id: 1,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "IO09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id: 2,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id: 3,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    },
+    {
+      id: 4,
+      BillId: 1,
+      Brand: "Chocalate",
+      SalespersonName: "Hari",
+      Beat: "PaperMill",
+      Day: "Thursday",
+      Bill_Number: "FR09876545678",
+      Billdate: "24/9/2024",
+      day_count: 14,
+      RetailerName: "Pandian Stores Super Market",
+      Balance: 1000,
+      Rec: 100,
+      InvoiceAmount: 500,
+      amount_received: 100,
+      Cheque: 0,
+      CashDiscount: 40,
+      Damage: 0,
+      Claim: 100,
+      CreditNote: 100,
+      Gpay: 100,
+      part_payment: 100,
+      delivery: 100,
+      Cancel: 100,
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null,
+      tally_status: "completed"
+    }
+  ]
 
   return (
     <>
@@ -386,8 +386,8 @@ export default function Home() {
             </Box>
           </div>
           {/* Modal for edit functionality */}
-          <Modal isOpen={modal} toggle={toggleFilter} centered={true} size="xl">
-            <ModalHeader toggle={toggleFilter}>{editData.billno}</ModalHeader>
+          <Modal isOpen={modal} toggle={toggle} centered={true} size="xl">
+            <ModalHeader toggle={toggle}>{editData.billno}</ModalHeader>
             <ModalBody>
               <div className="m-2 p-2">
                 <Row>
@@ -457,8 +457,8 @@ export default function Home() {
               <Button onClick={toggle}>Cancel</Button>
             </ModalFooter>
           </Modal>
-          <Modal isOpen={filterModal} toggle={toggle} centered={true} size="xl">
-            <ModalHeader toggle={toggle}>Filter</ModalHeader>
+          <Modal isOpen={filterModal} toggle={toggleFilter} centered={true} size="xl">
+            <ModalHeader toggle={toggleFilter}>Filter</ModalHeader>
             <ModalBody>
               <div className="m-2 p-2">
                 <Row>
