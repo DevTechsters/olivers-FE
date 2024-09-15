@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/authSlice';
+import { toast } from 'react-toastify';
 
 const LoginPage = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const LoginPage = () => {
 
       // Successful login
       dispatch(login({ username }));
+      toast.info("Logged in sucessfully")
       navigate("/home");
     } catch (error) {
       if (error.response) {

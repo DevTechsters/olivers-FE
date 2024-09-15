@@ -8,11 +8,10 @@ import Home from './pages/Home';
 import Upload from './pages/Upload';
 
 const ProtectedRoute = ({ element }) => {
-  const isAuthenticated = useSelector((store)=>store.auth.isAuthenticated)
 
-  console.log(isAuthenticated )
+  const isAuthenticated = sessionStorage.getItem("user")
 
-  return true ? element : <Navigate to="/" />;
+  return isAuthenticated ? element : <Navigate to="/" />;
 };
 
 const router = createBrowserRouter([
