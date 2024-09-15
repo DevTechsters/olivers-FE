@@ -79,7 +79,7 @@ export default function Home() {
   const handleEditClick = (id) => () => {
     setModal(true);
     setEditdata(rows[id]);
-    setBillsHistory(rows[id].BillsHistory);
+    setBillsHistory(rows[id].billsHistory);
   };
 
   const handleDeleteClick = (id) => () => {
@@ -131,7 +131,7 @@ export default function Home() {
     console.log(editPayload);
     
     try{
-      await axios.post("/api",editPayload)
+      await axios.post(`/api/bill/edit/${editData.invoiceId}`,editPayload)
       toast.info("Saved successfully")
     }
     catch(error){
