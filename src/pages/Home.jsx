@@ -133,6 +133,8 @@ export default function Home() {
     try{
       await axios.post(`/api/bill/edit/${editData.invoiceId}`,editPayload)
       toast.info("Saved successfully")
+      await fetchBills(); // Fetch the updated data directly
+      toggle(); 
     }
     catch(error){
       toast.error(error.response)
@@ -189,26 +191,27 @@ export default function Home() {
     { field: 'tallyStatus', headerName: 'Tally Status', width: 130 },
   ];
 
-  useEffect(() => {
-    const fetchBills = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
-        );
-        const billsData = response.data.Bills.map((bill, index) => ({
-          id: index,  // Assign an ID for each row
-          ...bill,
-        }));
-        setRows(billsData);
-      } catch (error) {
-        console.error('Error fetching bills:', error);
-      }
-      setLoading(false);
-    };
+  const fetchBills = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
+      );
+      const billsData = response.data.Bills.map((bill, index) => ({
+        id: index,  // Assign an ID for each row
+        ...bill,
+      }));
+      setRows(billsData);
+    } catch (error) {
+      console.error('Error fetching bills:', error);
+    }
+    setLoading(false);
+  };
 
-    fetchBills();
-  }, [paginationModel]);
+  useEffect(() => {
+    fetchBills(); // Initial data fetch
+  }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
+  
 
   // const rows = [
   //   {
