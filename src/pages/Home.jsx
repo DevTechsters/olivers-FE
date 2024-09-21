@@ -195,7 +195,7 @@ export default function Home() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
+        `http://olivers-backend-container:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
       );
       const billsData = response.data.Bills.map((bill, index) => ({
         id: index,  // Assign an ID for each row

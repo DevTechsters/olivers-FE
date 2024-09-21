@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8081', // Your Spring Boot backend URL
+        target: 'http://olivers-backend-container:8081', // Your Spring Boot backend URL
         changeOrigin: true,
         secure: false,
         // Remove /api prefix before forwarding request
