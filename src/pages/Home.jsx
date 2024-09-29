@@ -8,9 +8,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
+import { styled } from '@mui/material/styles';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table,FormFeedback } from 'reactstrap';
 import axios from 'axios';
+import Checkbox from '@mui/material/Checkbox';
 import Select from 'react-select';
 import moment from 'moment';
 import { comment } from 'postcss';
@@ -18,15 +20,136 @@ import { toast } from 'react-toastify';
 import _ from 'lodash';
 
 
+
 export default function Home() {
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 5,  // Changed this to 5 to match API request size
   });
+  const [selectedRows, setSelectedRows] = useState({});
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
   const [rows, setRows] = useState([]);  // Set state for rows (Bills)
+  const [deliveryStatuses, setDeliveryStatuses] = useState({});
+
+
+  const handleRowSelection = (id) => (event) => {
+    setSelectedRows(prev => ({
+      ...prev,
+      [id]: event.target.checked
+    }));
+  };
+
+  
+  
+
+  
+  const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
+    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
+      outline: 'none',
+    },
+    '& .MuiDataGrid-cell:hover': {
+      backgroundColor: 'transparent',
+    },
+    '& .actions': {
+      color: theme.palette.text.primary,
+      '&:hover': {
+        backgroundColor: 'transparent',
+      },
+      '& .MuiIconButton-root': {
+        padding: 0,
+      },
+    },
+  }));
+
+  
+
+  const deliveryStatusOptions = [
+    { value: 'Delivered', label: 'Delivered' },
+    { value: 'Partially Delivered', label: 'Partially Delivered' },
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Cancelled', label: 'Cancelled' },
+  ];
+
+ 
+
+
+  // Handle delivery status change
+  // Handle delivery status change
+  const handleDeliveryStatusChange = async (selectedOption, id) => {
+    // Update local state
+    setRows(prevRows => 
+      prevRows.map(row => 
+        row.id === id ? { ...row, deliveryStatus: selectedOption.value } : row
+      )
+    );
+  
+    // Send update to backend
+    try {
+      await axios.patch(`/api/bill/${id}`, { deliveryStatus: selectedOption.value });
+    } catch (error) {
+      console.error('Error updating delivery status:', error);
+      // Optionally, revert the local state change if the API call fails
+    }
+  };
+
+  // Tailwind inspired custom styles for react-select
+  // Tailwind inspired custom styles for react-select
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      backgroundColor: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
+      '&:hover': {
+        border: 'none',
+      },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      padding: '0',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      marginLeft: '0',
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: '0',
+      padding: '0',
+    }),
+    indicatorSeparator: () => ({
+      display: 'none',
+    }),
+    dropdownIndicator: (provided, state) => ({
+      ...provided,
+      color: state.isFocused ? '#4f46e5' : '#6b7280',
+      padding: '0',
+      ':hover': {
+        color: '#4f46e5',
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: 'white',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      border: 'none',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? '#4f46e5'
+        : state.isFocused
+        ? '#e0e7ff'
+        : 'white',
+      color: state.isSelected ? 'white' : '#111827',
+      padding: '8px 12px',
+    }),
+  };
+
+
+
   const [BillsHistory, setBillsHistory] = useState([]);
   const [addBill,setAddbill]=useState({
     receivedAmount:0,
@@ -141,14 +264,25 @@ export default function Home() {
     }
   }
 
+  
+
   const columns = [
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 150,
       cellClassName: 'actions',
       getActions: ({ id }) => [
+        <GridActionsCellItem
+          icon={<Checkbox 
+            checked={!!selectedRows[id]}
+            onChange={handleRowSelection(id)}
+          />}
+          label="Select"
+          className="textPrimary"
+          onClick={() => {}}
+        />,
         <GridActionsCellItem
           icon={<EditIcon />}
           label="Edit"
@@ -172,7 +306,6 @@ export default function Home() {
     { field: 'retailerName', headerName: 'Retailer Name', width: 150 },
     { field: 'invoiceAmount', headerName: 'Invoice Amount', width: 130 },
     { field: 'balance', headerName: 'Balance', width: 100 },
-    { field: 'rec', headerName: 'REC', width: 100 },
     { field: 'amountReceived', headerName: 'Amount Received', width: 130 },
     { field: 'cheque', headerName: 'Cheque', width: 120 },
     { field: 'cashDiscount', headerName: 'Cash Discount', width: 130 },
@@ -181,8 +314,32 @@ export default function Home() {
     { field: 'creditNote', headerName: 'Credit Note', width: 130 },
     { field: 'gpay', headerName: 'GPay', width: 120 },
     { field: 'partPayment', headerName: 'Part Payment', width: 130 },
-    { field: 'delivery', headerName: 'Delivery', width: 120 },
-    { field: 'cancel', headerName: 'Cancel', width: 120 },
+    { field: 'delivery', headerName: 'Delivery', width: 130 },
+    {
+      
+        field: 'deliveryStatus',
+        headerName: 'Delivery Status',
+        width: 200,
+        editable: true,
+        renderCell: (params) => {
+          const status = deliveryStatusOptions.find(option => option.value === params.value);
+          return (
+            <Select
+              value={status}
+              onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id)}
+              options={deliveryStatusOptions}
+              styles={customSelectStyles}
+              placeholder="Select status"
+              isClearable={false}
+              menuPortalTarget={document.body}
+              components={{
+                IndicatorSeparator: () => null
+              }}
+            />
+          );
+        },
+      },
+    
     { field: 'remarks', headerName: 'Remarks', width: 180 },
     { field: 'createdBy', headerName: 'Created By', width: 130 },
     { field: 'createdAt', headerName: 'Created At', width: 100 },
@@ -442,17 +599,28 @@ export default function Home() {
           </div>
           <div className="m-4 bg-white">
             <Box sx={{ height: '77vh', width: '100%' }}>
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                loading={loading}
-                rowCount={rows.length}
-                pageSizeOptions={[5, 10, 50]}
-                paginationModel={paginationModel}
-                paginationMode="server"
-                onPaginationModelChange={setPaginationModel}
-                disableRowSelectionOnClick
-              />
+            <DataGrid
+  rows={rows}
+  columns={columns}
+  loading={loading}
+  rowCount={rows.length}
+  pageSizeOptions={[5, 10, 50]}
+  paginationModel={paginationModel}
+  paginationMode="server"
+  onPaginationModelChange={setPaginationModel}
+  disableRowSelectionOnClick
+  onCellEditCommit={(params) => {
+    const updatedRows = rows.map((row) => 
+      row.id === params.id ? { ...row, [params.field]: params.value } : row
+    );
+    setRows(updatedRows);
+  }}
+  getRowClassName={(params) => 
+    selectedRows[params.id] ? 'highlighted-row' : ''
+  }
+  disableAutoFocus={true}
+  keepNonExistentRowsSelected={true}
+/>
             </Box>
           </div>
           {/* Modal for edit functionality */}
