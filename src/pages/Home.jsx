@@ -211,6 +211,7 @@ export default function Home() {
     paymentMethod: ''
   });
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
+  const [chequeModal,setChequeModal]=useState(false)
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
       outline: 'none',
@@ -327,6 +328,10 @@ export default function Home() {
     setFilterModal(!filterModal)
   }
 
+  const toggleCheque=()=>{
+    setChequeModal(!chequeModal)
+  }
+
 
   const handleAddbill = (e) => {
     setAddbill({ ...addBill, [e.target.id]: e.target.value })
@@ -441,7 +446,7 @@ export default function Home() {
           icon={<EditIcon />}
           label="Edit"
           className="textPrimary"
-          onClick={handleEditClick()}
+          onClick={toggleCheque}
           color="inherit"
         /></p>
           </>
@@ -706,6 +711,36 @@ export default function Home() {
               <Button onClick={toggleFilter}>Cancel</Button>
             </ModalFooter>
           </Modal>
+
+          <Modal isOpen={chequeModal} toggle={toggleCheque} centered={true} size="xl">
+            <ModalHeader toggle={toggleCheque}>Cheque Details</ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col>
+                  <Label>Bank Name</Label>
+                  <Input type='text' />
+                </Col>
+                <Col>
+                  <Label>Cheque Number</Label>
+                  <Input type='text' />
+                </Col>
+                <Col>
+                  <Label>Cheque Date</Label>
+                  <Input type='date' />
+                </Col>
+                <Col>
+                  <Label>Amount</Label>
+                  <Input type='number' />
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary">Save</Button>
+              <Button onClick={toggleCheque}>Cancel</Button>
+            </ModalFooter>
+          </Modal>
+
+
 
         </>
       )}
