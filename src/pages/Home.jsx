@@ -10,14 +10,12 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Loader from '../components/Loader';
 import { styled } from '@mui/material/styles';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table,FormFeedback } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table, FormFeedback } from 'reactstrap';
 import axios from 'axios';
-import Checkbox from '@mui/material/Checkbox';
 import Select from 'react-select';
-import moment from 'moment';
-import { comment } from 'postcss';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
+import SaveIcon from '@mui/icons-material/Save';
 
 
 
@@ -30,21 +28,189 @@ export default function Home() {
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [rows, setRows] = useState([]);  // Set state for rows (Bills)
+  const [rows, setRows] = useState([{
+    id: 0,
+    billId: 1,
+    brand: "Chocalate",
+    salespersonName: "Hariii",
+    beat: "PaperMill",
+    day: "Thursday",
+    bill_Number: "FR09876545678",
+    billdate: "24/9/2024",
+    day_count: 14,
+    retailerName: "Pandian Stores Super Market",
+    balance: 1000,
+    rec: 100,
+    invoiceAmount: 500,
+    amount_received: 100,
+    cheque: 10,
+    cashDiscount: 40,
+    damage: 0,
+    claim: 100,
+    creditNote: 100,
+    gpay: 100,
+    partPayment: 100,
+    delivery: 100,
+    cancel: 100,
+    createdBy: "Admin",
+    createdAt: "2024-04-26T10:30:00",
+    updatedBy: null,
+    updatedAt: null,
+    tally_status: "completed",
+    BillsHistory: [{
+      date: "26/4/2024",
+      paymentMethod: "Cash, Credit Note",
+      receivedAmoun: 200,
+      comments: "Paid cash and used credit note",
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+  ]
+  },{
+    id: 1,
+    billId: 2,
+    brand: "Chocalate",
+    salespersonName: "Hariii",
+    beat: "PaperMill",
+    day: "Thursday",
+    bill_Number: "FR09876545678",
+    billdate: "24/9/2024",
+    day_count: 14,
+    retailerName: "Pandian Stores Super Market",
+    balance: 1000,
+    rec: 100,
+    invoiceAmount: 500,
+    amount_received: 100,
+    cheque: 10,
+    cashDiscount: 40,
+    damage: 0,
+    claim: 100,
+    creditNote: 100,
+    gpay: 100,
+    partPayment: 100,
+    delivery: 100,
+    cancel: 100,
+    createdBy: "Admin",
+    createdAt: "2024-04-26T10:30:00",
+    updatedBy: null,
+    updatedAt: null,
+    remarks:"hiii",
+    tally_status: "completed",
+    billsHistory: [{
+      date: "26/4/2024",
+      paymentMethod: "Cash, Credit Note",
+      receivedAmoun: 200,
+      comments: "Paid cash and used credit note",
+      createdBy: "Admin",
+      createdAt: "2024-04-26T10:30:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+    {
+      date: "27/4/2024",
+      paymentMethod: "Gpay, Part Payment",
+      receivedAmount: 150,
+      comments: "Part payment through Gpay",
+      createdBy: "Admin",
+      createdAt: "2024-04-27T11:00:00",
+      updatedBy: null,
+      updatedAt: null
+    },
+  ]
+  }]);  // Set state for rows (Bills)
   const [deliveryStatuses, setDeliveryStatuses] = useState({});
-
-
-  const handleRowSelection = (id) => (event) => {
-    setSelectedRows(prev => ({
-      ...prev,
-      [id]: event.target.checked
-    }));
-  };
-
-  
-  
-
-  
+  const [BillsHistory, setBillsHistory] = useState([]);
+  const [addBill, setAddbill] = useState({
+    receivedAmount: 0,
+    comments: "",
+    date: ""
+  })
+  const [paymentMethod, setPaymentMethod] = useState("")
+  const [filterModal, setFilterModal] = useState(false)
+  const [filterData, setFilterData] = useState({
+    option1: null,
+    option2: null,
+    option3: null,
+  });
+  const [editPayload, setEditPayload] = useState([])
+  const [errors, setErrors] = useState({
+    receivedAmount: '',
+    date: "",
+    paymentMethod: ''
+  });
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
       outline: 'none',
@@ -62,29 +228,22 @@ export default function Home() {
       },
     },
   }));
-
-  
-
   const deliveryStatusOptions = [
     { value: 'Delivered', label: 'Delivered' },
     { value: 'Partially Delivered', label: 'Partially Delivered' },
     { value: 'Pending', label: 'Pending' },
     { value: 'Cancelled', label: 'Cancelled' },
   ];
-
- 
-
-
   // Handle delivery status change
   // Handle delivery status change
   const handleDeliveryStatusChange = async (selectedOption, id) => {
     // Update local state
-    setRows(prevRows => 
-      prevRows.map(row => 
+    setRows(prevRows =>
+      prevRows.map(row =>
         row.id === id ? { ...row, deliveryStatus: selectedOption.value } : row
       )
     );
-  
+
     // Send update to backend
     try {
       await axios.patch(`/api/bill/${id}`, { deliveryStatus: selectedOption.value });
@@ -141,61 +300,39 @@ export default function Home() {
       backgroundColor: state.isSelected
         ? '#4f46e5'
         : state.isFocused
-        ? '#e0e7ff'
-        : 'white',
+          ? '#e0e7ff'
+          : 'white',
       color: state.isSelected ? 'white' : '#111827',
       padding: '8px 12px',
     }),
   };
 
-
-
-  const [BillsHistory, setBillsHistory] = useState([]);
-  const [addBill,setAddbill]=useState({
-    receivedAmount:0,
-    comments:"",
-    date:""
-  })
-  const [paymentMethod,setPaymentMethod]=useState("")
-  const [filterModal,setFilterModal]=useState(false)
-  const [filterData, setFilterData] = useState({
-    option1: null,
-    option2: null,
-    option3: null,
-  });
-  const [editPayload,setEditPayload]=useState([])
-  const [errors, setErrors] = useState({
-    receivedAmount:'',
-    date:"",
-    paymentMethod:''
-  });
-
-  const toggle = () =>{
+  const toggle = () => {
     setModal(!modal);
     setAddbill({
-      receivedAmount:0,
-    comments:"",
-    date:""
+      receivedAmount: 0,
+      comments: "",
+      date: ""
     })
     setPaymentMethod("")
     setEditPayload([])
     setErrors({
-      receivedAmount:'',
-      date:"",
-      paymentMethod:''
+      receivedAmount: '',
+      date: "",
+      paymentMethod: ''
     })
   }
 
-  const toggleFilter =()=>{
+  const toggleFilter = () => {
     setFilterModal(!filterModal)
   }
 
 
-  const handleAddbill=(e)=>{
-    setAddbill({...addBill,[e.target.id]:e.target.value})
+  const handleAddbill = (e) => {
+    setAddbill({ ...addBill, [e.target.id]: e.target.value })
   }
 
-  const handlePaymentMethod=(e)=>{
+  const handlePaymentMethod = (e) => {
     setPaymentMethod(e.label)
   }
 
@@ -219,52 +356,50 @@ export default function Home() {
       newErrors.date = 'Date is required';
     }
 
-    if(!paymentMethod)
-    {
-      newErrors.paymentMethod="Payment Method is required"
+    if (!paymentMethod) {
+      newErrors.paymentMethod = "Payment Method is required"
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddClick=()=>{  
-    if(!validateForm())
-    {
+  const handleAddClick = () => {
+    if (!validateForm()) {
       toast.error("Fill mandatory fields")
-        return;
-    }  
-    let username=sessionStorage.getItem("user")
-    let arr=_.cloneDeep(BillsHistory)
-    arr.push({...addBill,paymentMethod:paymentMethod,createdBy:username})
+      return;
+    }
+    let username = sessionStorage.getItem("user")
+    let arr = _.cloneDeep(BillsHistory)
+    arr.push({ ...addBill, paymentMethod: paymentMethod, createdBy: username })
     setBillsHistory(arr)
-    let payloadArr=_.cloneDeep(editPayload)
-    payloadArr.push({...addBill,paymentMethod:paymentMethod,createdBy:username})
+    let payloadArr = _.cloneDeep(editPayload)
+    payloadArr.push({ ...addBill, paymentMethod: paymentMethod, createdBy: username })
     setEditPayload(payloadArr)
     setAddbill({
-      receivedAmount:0,
-      comments:"",
-      date:""
+      receivedAmount: 0,
+      comments: "",
+      date: ""
     })
     toast.info("Added Succesfully")
-    
+
   }
 
-  const saveEdit=async()=>{
+  const saveEdit = async () => {
     console.log(editPayload);
-    
-    try{
-      await axios.post(`/api/bill/edit/${editData.invoiceId}`,editPayload)
+
+    try {
+      await axios.post(`/api/bill/edit/${editData.invoiceId}`, editPayload)
       toast.info("Saved successfully")
       await fetchBills(); // Fetch the updated data directly
-      toggle(); 
+      toggle();
     }
-    catch(error){
+    catch (error) {
       toast.error(error.response)
     }
   }
 
-  
+
 
   const columns = [
     {
@@ -274,15 +409,6 @@ export default function Home() {
       width: 150,
       cellClassName: 'actions',
       getActions: ({ id }) => [
-        <GridActionsCellItem
-          icon={<Checkbox 
-            checked={!!selectedRows[id]}
-            onChange={handleRowSelection(id)}
-          />}
-          label="Select"
-          className="textPrimary"
-          onClick={() => {}}
-        />,
         <GridActionsCellItem
           icon={<EditIcon />}
           label="Edit"
@@ -307,40 +433,54 @@ export default function Home() {
     { field: 'invoiceAmount', headerName: 'Invoice Amount', width: 130 },
     { field: 'balance', headerName: 'Balance', width: 100 },
     { field: 'amountReceived', headerName: 'Amount Received', width: 130 },
-    { field: 'cheque', headerName: 'Cheque', width: 120 },
-    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130 },
-    { field: 'damage', headerName: 'Damage', width: 120 },
-    { field: 'claim', headerName: 'Claim', width: 120 },
-    { field: 'creditNote', headerName: 'Credit Note', width: 130 },
-    { field: 'gpay', headerName: 'GPay', width: 120 },
-    { field: 'partPayment', headerName: 'Part Payment', width: 130 },
-    { field: 'delivery', headerName: 'Delivery', width: 130 },
-    {
-      
-        field: 'deliveryStatus',
-        headerName: 'Delivery Status',
-        width: 200,
-        editable: true,
-        renderCell: (params) => {
-          const status = deliveryStatusOptions.find(option => option.value === params.value);
-          return (
-            <Select
-              value={status}
-              onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id)}
-              options={deliveryStatusOptions}
-              styles={customSelectStyles}
-              placeholder="Select status"
-              isClearable={false}
-              menuPortalTarget={document.body}
-              components={{
-                IndicatorSeparator: () => null
-              }}
-            />
-          );
-        },
+    { field: 'cheque', headerName: 'Cheque', width: 120 ,editable: true,
+      renderCell:(params)=>{
+        return (
+          <>
+          <p>{params.value} <GridActionsCellItem
+          icon={<EditIcon />}
+          label="Edit"
+          className="textPrimary"
+          onClick={handleEditClick()}
+          color="inherit"
+        /></p>
+          </>
+        )
       },
-    
-    { field: 'remarks', headerName: 'Remarks', width: 180 },
+    },
+    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130},
+    { field: 'damage', headerName: 'Damage', width: 120 ,editable: true},
+    { field: 'claim', headerName: 'Claim', width: 120 ,editable: true},
+    { field: 'creditNote', headerName: 'Credit Note', width: 130 ,editable: true},
+    { field: 'gpay', headerName: 'GPay', width: 120 ,editable: true},
+    { field: 'partPayment', headerName: 'Part Payment', width: 130 ,editable: true},
+    { field: 'delivery', headerName: 'Delivery', width: 130,editable: true },
+    {
+
+      field: 'deliveryStatus',
+      headerName: 'Delivery Status',
+      width: 200,
+      editable: true,
+      renderCell: (params) => {
+        const status = deliveryStatusOptions.find(option => option.value === params.value);
+        return (
+          <Select
+            value={status}
+            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id)}
+            options={deliveryStatusOptions}
+            styles={customSelectStyles}
+            placeholder="Select status"
+            isClearable={false}
+            menuPortalTarget={document.body}
+            components={{
+              IndicatorSeparator: () => null
+            }}
+          />
+        );
+      },
+    },
+
+    { field: 'remarks', headerName: 'Remarks', width: 180 ,editable: true},
     { field: 'createdBy', headerName: 'Created By', width: 130 },
     { field: 'createdAt', headerName: 'Created At', width: 100 },
     { field: 'updatedBy', headerName: 'Updated By', width: 100 },
@@ -368,211 +508,48 @@ export default function Home() {
   useEffect(() => {
     fetchBills(); // Initial data fetch
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
-  
 
-  // const rows = [
-  //   {
-  //     id: 0,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hariii",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed",
-  //     BillsHistory: [{
-  //       date: "26/4/2024",
-  //       paymentMethod: "Cash, Credit Note",
-  //       receivedAmoun: 200,
-  //       comments: "Paid cash and used credit note",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-26T10:30:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //     {
-  //       date: "27/4/2024",
-  //       paymentMethod: "Gpay, Part Payment",
-  //       receivedAmount: 150,
-  //       comments: "Part payment through Gpay",
-  //       createdBy: "Admin",
-  //       createdAt: "2024-04-27T11:00:00",
-  //       updatedBy: null,
-  //       updatedAt: null
-  //     },
-  //   ]
-  //   },
-  //   {
-  //     id: 1,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "IO09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 2,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 3,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   },
-  //   {
-  //     id: 4,
-  //     BillId: 1,
-  //     Brand: "Chocalate",
-  //     SalespersonName: "Hari",
-  //     Beat: "PaperMill",
-  //     Day: "Thursday",
-  //     Bill_Number: "FR09876545678",
-  //     Billdate: "24/9/2024",
-  //     day_count: 14,
-  //     RetailerName: "Pandian Stores Super Market",
-  //     Balance: 1000,
-  //     Rec: 100,
-  //     InvoiceAmount: 500,
-  //     amount_received: 100,
-  //     Cheque: 0,
-  //     CashDiscount: 40,
-  //     Damage: 0,
-  //     Claim: 100,
-  //     CreditNote: 100,
-  //     Gpay: 100,
-  //     part_payment: 100,
-  //     delivery: 100,
-  //     Cancel: 100,
-  //     createdBy: "Admin",
-  //     createdAt: "2024-04-26T10:30:00",
-  //     updatedBy: null,
-  //     updatedAt: null,
-  //     tally_status: "completed"
-  //   }
-  // ]
+
+  const handleCelleditCommit=(newRow) => {
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? newRow : row))
+    );
+    return newRow;
+  }
+
+  const saveCall=()=>{
+    console.log(rowSelectionModel);
+    const payload=[]
+    rowSelectionModel.map((id)=>{
+      let {
+        cashDiscount,
+        damage,
+        claim,
+        creditNote,
+        gpay,
+        partPayment,
+        delivery,
+        cancel,remarks,billno}=rows[id]
+
+
+        payload.push({
+          cashDiscount,
+          damage,
+          claim,
+          creditNote,
+          gpay,
+          partPayment,
+          delivery,
+          cancel,
+          remarks,
+          billno
+        })
+    })
+
+    console.log(payload);
+    
+    
+  }
 
   return (
     <>
@@ -593,34 +570,36 @@ export default function Home() {
                 <input className="h-full focus:outline-none" type="text" placeholder="Search..." />
               </div>
             </div>
-            <button className="bg-blue-500 text-white px-4 rounded">
-              <FileDownloadIcon /> Export
-            </button>
+            <div className="flex space-x-2 mx-6">
+            <button className="bg-blue-500 text-white px-4 rounded" onClick={saveCall}>
+                <SaveIcon/> Save
+              </button>
+              <button className="bg-blue-500 text-white px-4 rounded">
+                <FileDownloadIcon /> Export
+              </button>
+            </div>
           </div>
           <div className="m-4 bg-white">
             <Box sx={{ height: '77vh', width: '100%' }}>
-            <DataGrid
-  rows={rows}
-  columns={columns}
-  loading={loading}
-  rowCount={rows.length}
-  pageSizeOptions={[5, 10, 50]}
-  paginationModel={paginationModel}
-  paginationMode="server"
-  onPaginationModelChange={setPaginationModel}
-  disableRowSelectionOnClick
-  onCellEditCommit={(params) => {
-    const updatedRows = rows.map((row) => 
-      row.id === params.id ? { ...row, [params.field]: params.value } : row
-    );
-    setRows(updatedRows);
-  }}
-  getRowClassName={(params) => 
-    selectedRows[params.id] ? 'highlighted-row' : ''
-  }
-  disableAutoFocus={true}
-  keepNonExistentRowsSelected={true}
-/>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                loading={loading}
+                rowCount={rows.length}
+                pageSizeOptions={[5, 10, 50]}
+                paginationModel={paginationModel}
+                paginationMode="server"
+                onPaginationModelChange={setPaginationModel}
+                disableRowSelectionOnClick
+                processRowUpdate={handleCelleditCommit}
+                disableAutoFocus={true}
+                keepNonExistentRowsSelected={true}
+                checkboxSelection={true}
+                onRowSelectionModelChange={(newRowSelectionModel) => {
+                  setRowSelectionModel(newRowSelectionModel);
+                }}
+                rowSelectionModel={rowSelectionModel}
+              />
             </Box>
           </div>
           {/* Modal for edit functionality */}
@@ -653,7 +632,7 @@ export default function Home() {
                   </Col>
                   <Col>
                     <Label>Amount *</Label>
-                    <Input id='receivedAmount' value={addBill.receivedAmount} type="number" min="1" onChange={handleAddbill}  invalid={!!errors.receivedAmount}/>
+                    <Input id='receivedAmount' value={addBill.receivedAmount} type="number" min="1" onChange={handleAddbill} invalid={!!errors.receivedAmount} />
                     {errors.receivedAmount && <FormFeedback>{errors.receivedAmount}</FormFeedback>}
                   </Col>
                   <Col>
@@ -707,17 +686,17 @@ export default function Home() {
                   <Select />
                 </Row>
                 <Row>
-                    <Label>Retailer Name</Label>
-                    <Select />
+                  <Label>Retailer Name</Label>
+                  <Select />
                 </Row>
                 <Row>
                   <Col>
-                      <Label>From</Label>
-                      <Input type='date' />
+                    <Label>From</Label>
+                    <Input type='date' />
                   </Col>
                   <Col>
-                      <Label>To</Label>
-                      <Input type='date' />
+                    <Label>To</Label>
+                    <Input type='date' />
                   </Col>
                 </Row>
               </div>

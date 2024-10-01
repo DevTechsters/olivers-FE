@@ -1,9 +1,9 @@
 import React from 'react';
-import Button from '@mui/material/Button';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../redux/authSlice';
+import Button from '@mui/material/Button';
 
 function Header() {
   const dispatch = useDispatch();
@@ -13,11 +13,6 @@ function Header() {
   const logoutCall = () => {
     dispatch(logout());
     navigate("/");
-  }
-
-  const saveCall = () => {
-    // Add save functionality here
-    console.log("Save functionality to be implemented.");
   }
 
   return (
@@ -33,16 +28,6 @@ function Header() {
           </NavLink>
         </div>
         <div className='flex items-center gap-4'>
-          {location.pathname === '/home' && (  // Conditionally render the Save button
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={saveCall} 
-              className='bg-blue-600 text-white hover:bg-blue-700 transition duration-200'
-            >
-              Save
-            </Button>
-          )}
           <Button 
             variant="outlined" 
             color="primary" 
