@@ -24,173 +24,88 @@ export default function Home() {
     page: 0,
     pageSize: 5,  // Changed this to 5 to match API request size
   });
-  const [selectedRows, setSelectedRows] = useState({});
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
   const [rows, setRows] = useState([{
     id: 0,
-    billId: 1,
-    brand: "Chocalate",
-    salespersonName: "Hariii",
-    beat: "PaperMill",
-    day: "Thursday",
-    bill_Number: "FR09876545678",
-    billdate: "24/9/2024",
-    day_count: 14,
-    retailerName: "Pandian Stores Super Market",
-    balance: 1000,
-    rec: 100,
-    invoiceAmount: 500,
-    amount_received: 100,
-    cheque: 10,
-    cashDiscount: 40,
+    invoiceId: 35,
+    brand: "Mango Bite",
+    salespersonName: "Murali",
+    beat: "Beat 1",
+    billno: "1001.0",
+    billdate: "2024-08-31T18:30:00.000+00:00",
+    retailerName: "ABC Stores",
+    updatedInvoiceAmount: 500,
+    balance: 300,
+    amountReceived: 200,
+    cheque: 100,
+    cashDiscount: 0,
     damage: 0,
-    claim: 100,
-    creditNote: 100,
+    claim: 0,
+    creditNote: 0,
     gpay: 100,
-    partPayment: 100,
-    delivery: 100,
-    cancel: 100,
-    createdBy: "Admin",
-    createdAt: "2024-04-26T10:30:00",
+    cash: 0,
+    deliveryPerson: 0,
+    deliveryStatus: "Pending",
+    createdBy: null,
+    createdAt: null,
     updatedBy: null,
     updatedAt: null,
-    tally_status: "completed",
-    BillsHistory: [{
-      date: "26/4/2024",
-      paymentMethod: "Cash, Credit Note",
-      receivedAmoun: 200,
-      comments: "Paid cash and used credit note",
-      createdBy: "Admin",
-      createdAt: "2024-04-26T10:30:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-  ]
-  },{
-    id: 1,
-    billId: 2,
-    brand: "Chocalate",
-    salespersonName: "Hariii",
-    beat: "PaperMill",
-    day: "Thursday",
-    bill_Number: "FR09876545678",
-    billdate: "24/9/2024",
-    day_count: 14,
-    retailerName: "Pandian Stores Super Market",
-    balance: 1000,
-    rec: 100,
-    invoiceAmount: 500,
-    amount_received: 100,
-    cheque: 10,
-    cashDiscount: 40,
-    damage: 0,
-    claim: 100,
-    creditNote: 100,
-    gpay: 100,
-    partPayment: 100,
-    delivery: 100,
-    cancel: 100,
-    createdBy: "Admin",
-    createdAt: "2024-04-26T10:30:00",
-    updatedBy: null,
-    updatedAt: null,
-    remarks:"hiii",
-    tally_status: "completed",
-    billsHistory: [{
-      date: "26/4/2024",
-      paymentMethod: "Cash, Credit Note",
-      receivedAmoun: 200,
-      comments: "Paid cash and used credit note",
-      createdBy: "Admin",
-      createdAt: "2024-04-26T10:30:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-    {
-      date: "27/4/2024",
-      paymentMethod: "Gpay, Part Payment",
-      receivedAmount: 150,
-      comments: "Part payment through Gpay",
-      createdBy: "Admin",
-      createdAt: "2024-04-27T11:00:00",
-      updatedBy: null,
-      updatedAt: null
-    },
-  ]
-  }]);  // Set state for rows (Bills)
-  const [deliveryStatuses, setDeliveryStatuses] = useState({});
+    tallyStatus: null,
+    remarks: "123",
+    originalInvoiceAmount: 500,
+    cheques: [
+      {
+        chequeId: 15,
+        bankName: "IOB",
+        chequeNumber: "1234",
+        chequeDate: "2024-08-31T18:30:00.000+00:00",
+        chequeAmount: 100,
+        isCleared: false,
+        isBounced: true,
+        bounceAmt: 100
+      }
+
+    ],
+    billsHistory: [
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      }
+    ]
+  }
+  ]);  // Set state for rows (Bills)
+  const [chequeEdit, setChequeEdit] = useState(null);
   const [BillsHistory, setBillsHistory] = useState([]);
   const [addBill, setAddbill] = useState({
     receivedAmount: 0,
@@ -211,7 +126,17 @@ export default function Home() {
     paymentMethod: ''
   });
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
-  const [chequeModal,setChequeModal]=useState(false)
+  const [chequeModal, setChequeModal] = useState(false)
+  const [chequeData,setChequeData]=useState({
+    bankName: "",
+    chequeNumber: "",
+    chequeDate: "",
+    chequeAmount: "",
+    isCleared: false,
+    isBounced: false,
+    bounceAmt: 0
+  })
+
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
       outline: 'none',
@@ -328,7 +253,7 @@ export default function Home() {
     setFilterModal(!filterModal)
   }
 
-  const toggleCheque=()=>{
+  const toggleCheque = () => {
     setChequeModal(!chequeModal)
   }
 
@@ -438,28 +363,32 @@ export default function Home() {
     { field: 'invoiceAmount', headerName: 'Invoice Amount', width: 130 },
     { field: 'balance', headerName: 'Balance', width: 100 },
     { field: 'amountReceived', headerName: 'Amount Received', width: 130 },
-    { field: 'cheque', headerName: 'Cheque', width: 120 ,editable: true,
-      renderCell:(params)=>{
+    {
+      field: 'cheque', headerName: 'Cheque', width: 120, editable: true,
+      renderCell: (params,row) => {
         return (
           <>
-          <p>{params.value} <GridActionsCellItem
-          icon={<EditIcon />}
-          label="Edit"
-          className="textPrimary"
-          onClick={toggleCheque}
-          color="inherit"
-        /></p>
+            <p>{params.value} <GridActionsCellItem
+              icon={<EditIcon />}
+              label="Edit"
+              className="textPrimary"
+              onClick={(e)=>{
+                setChequeEdit(params.id)
+                toggleCheque()
+              }}
+              color="inherit"
+            /></p>
           </>
         )
       },
     },
-    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130},
-    { field: 'damage', headerName: 'Damage', width: 120 ,editable: true},
-    { field: 'claim', headerName: 'Claim', width: 120 ,editable: true},
-    { field: 'creditNote', headerName: 'Credit Note', width: 130 ,editable: true},
-    { field: 'gpay', headerName: 'GPay', width: 120 ,editable: true},
-    { field: 'partPayment', headerName: 'Part Payment', width: 130 ,editable: true},
-    { field: 'delivery', headerName: 'Delivery', width: 130,editable: true },
+    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130, editable: true },
+    { field: 'damage', headerName: 'Damage', width: 120, editable: true },
+    { field: 'claim', headerName: 'Claim', width: 120, editable: true },
+    { field: 'creditNote', headerName: 'Credit Note', width: 130, editable: true },
+    { field: 'gpay', headerName: 'GPay', width: 120, editable: true },
+    { field: 'partPayment', headerName: 'Part Payment', width: 130, editable: true },
+    { field: 'delivery', headerName: 'Delivery', width: 130, editable: true },
     {
 
       field: 'deliveryStatus',
@@ -485,7 +414,7 @@ export default function Home() {
       },
     },
 
-    { field: 'remarks', headerName: 'Remarks', width: 180 ,editable: true},
+    { field: 'remarks', headerName: 'Remarks', width: 180, editable: true },
     { field: 'createdBy', headerName: 'Created By', width: 130 },
     { field: 'createdAt', headerName: 'Created At', width: 100 },
     { field: 'updatedBy', headerName: 'Updated By', width: 100 },
@@ -515,17 +444,17 @@ export default function Home() {
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
 
 
-  const handleCelleditCommit=(newRow) => {
+  const handleCelleditCommit = (newRow) => {
     setRows((prevRows) =>
       prevRows.map((row) => (row.id === newRow.id ? newRow : row))
     );
     return newRow;
   }
 
-  const saveCall=()=>{
+  const saveCall = () => {
     console.log(rowSelectionModel);
-    const payload=[]
-    rowSelectionModel.map((id)=>{
+    const payload = []
+    rowSelectionModel.map((id) => {
       let {
         cashDiscount,
         damage,
@@ -534,27 +463,40 @@ export default function Home() {
         gpay,
         partPayment,
         delivery,
-        cancel,remarks,billno}=rows[id]
+        cancel, remarks, billno } = rows[id]
 
 
-        payload.push({
-          cashDiscount,
-          damage,
-          claim,
-          creditNote,
-          gpay,
-          partPayment,
-          delivery,
-          cancel,
-          remarks,
-          billno
-        })
+      payload.push({
+        cashDiscount,
+        damage,
+        claim,
+        creditNote,
+        gpay,
+        partPayment,
+        delivery,
+        cancel,
+        remarks,
+        billno
+      })
     })
 
     console.log(payload);
-    
+
+
+  }
+  console.log(rows);
+
+  const handleChequeAdd=()=>{
+    let rowObj=_.cloneDeep(rows)
+    rowObj[chequeEdit].cheques.push(chequeData)
+    setRows(rowObj)
     
   }
+
+  const handleCheque=(e)=>{
+    setChequeData({...chequeData,[e.target.id]:e.target.value})
+  }
+
 
   return (
     <>
@@ -576,8 +518,8 @@ export default function Home() {
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
-            <button className="bg-blue-500 text-white px-4 rounded" onClick={saveCall}>
-                <SaveIcon/> Save
+              <button className="bg-blue-500 text-white px-4 rounded" onClick={saveCall}>
+                <SaveIcon /> Save
               </button>
               <button className="bg-blue-500 text-white px-4 rounded">
                 <FileDownloadIcon /> Export
@@ -604,6 +546,12 @@ export default function Home() {
                   setRowSelectionModel(newRowSelectionModel);
                 }}
                 rowSelectionModel={rowSelectionModel}
+                slotProps={{
+                  loadingOverlay: {
+                    variant: 'linear-progress',
+                    noRowsVariant: 'linear-progress',
+                  },
+                }}
               />
             </Box>
           </div>
@@ -718,21 +666,54 @@ export default function Home() {
               <Row>
                 <Col>
                   <Label>Bank Name</Label>
-                  <Input type='text' />
+                  <Input type='text' id='bankName' onChange={handleCheque}/>
                 </Col>
                 <Col>
                   <Label>Cheque Number</Label>
-                  <Input type='text' />
+                  <Input type='text' id="chequeNumber"  onChange={handleCheque} />
                 </Col>
                 <Col>
                   <Label>Cheque Date</Label>
-                  <Input type='date' />
+                  <Input type='date' id='chequeDate' onChange={handleCheque}/>
                 </Col>
                 <Col>
                   <Label>Amount</Label>
-                  <Input type='number' />
+                  <Input type='number' id="chequeAmount" onChange={handleCheque} />
+                </Col>
+                <Col>
+                  <Button color="primary" onClick={handleChequeAdd}>Add</Button>
                 </Col>
               </Row>
+              <div className="m-2 p-2">
+                <Table bordered hover responsive striped>
+                  <thead>
+                    <tr>
+                      <th>Bank Name</th>
+                      <th>Cheque Number</th>
+                      <th>Cheque Date</th>
+                      <th>Amount</th>
+                      <th>Cleared</th>
+                      <th>Bounced</th>
+                      <th>Bounced Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows[chequeEdit]?.cheques ?
+                      rows[chequeEdit].cheques.map((item) => (
+                        <tr key={item.chequeId}>
+                          <td>{item.bankName}</td>
+                          <td>{item.chequeNumber}</td>
+                          <td>{item.chequeDate}</td>
+                          <td>{item.chequeAmount}</td>
+                          <td><input type='checkbox' value={item.isCleared} /></td>
+                          <td><input type='checkbox' value={item.isBounced}/></td>
+                          <td><input type='number' value={item.bounceAmt} /></td>
+                        </tr>
+                      )):null}
+                  </tbody>
+                </Table>
+              </div>
+              
             </ModalBody>
             <ModalFooter>
               <Button color="primary">Save</Button>
