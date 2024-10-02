@@ -235,13 +235,24 @@ export default function Home() {
   ];
   // Handle delivery status change
   // Handle delivery status change
-  const handleDeliveryStatusChange = async (selectedOption, id) => {
+  const handleDeliveryStatusChange =(selectedOption, id,invoiceId) => {
     // Update local state
     setRows(prevRows =>
       prevRows.map(row =>
         row.id === id ? { ...row, deliveryStatus: selectedOption.value } : row
       )
     );
+    const save=_.cloneDeep(savePayload)
+    if(invoiceId in save){
+      save[invoiceId]={...save[invoiceId],deliveryStatus: selectedOption.value}
+    }
+    else
+    {
+      save[invoiceId]={...save[invoiceId],deliveryStatus: selectedOption.value}
+    }
+    setSavePayload(save)
+
+
 
     // Send update to backend
     // try {
@@ -491,7 +502,7 @@ export default function Home() {
         return (
           <Select
             value={status}
-            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id)}
+            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id,params.row.invoiceIdid)}
             options={deliveryStatusOptions}
             styles={customSelectStyles}
             placeholder="Select status"
