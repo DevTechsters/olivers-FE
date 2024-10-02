@@ -101,7 +101,65 @@ export default function Home() {
         createdAt: null,
         updatedBy: null,
         updatedAt: null
+      },
+      ,
+      {
+        id: 82,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      ,
+      {
+        id: 85,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 88,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
       }
+
     ]
   },
   {
@@ -134,6 +192,204 @@ export default function Home() {
     originalInvoiceAmount: 500,
     chequeHistory: [],
     billsHistory: [
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
       {
         id: 79,
         billId: 35,
@@ -740,8 +996,8 @@ export default function Home() {
           {/* Modal for edit functionality */}
           <Modal isOpen={modal} toggle={toggle} centered={true} size="xl">
             <ModalHeader toggle={toggle}>{editData.billno}</ModalHeader>
-            <ModalBody>
-              <div className="m-2 p-2">
+            <ModalBody >
+              <div className="m-2 p-2" >
                 <Row>
                   {/* Modal content for editing */}
                   <Col>
@@ -775,7 +1031,7 @@ export default function Home() {
                   </Col>
                 </Row>
               </div>
-              <div className="m-2 p-2">
+              <div className="m-2 p-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <Table bordered hover responsive striped>
                   <thead>
                     <tr>
@@ -870,7 +1126,7 @@ export default function Home() {
                   <Button color="primary" onClick={handleChequeAdd}>Add</Button>
                 </Col>
               </Row>
-              <div className="m-2 p-2">
+              <div className="m-2 p-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <Table bordered hover responsive striped>
                   <thead>
                     <tr>
