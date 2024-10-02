@@ -103,6 +103,71 @@ export default function Home() {
         updatedAt: null
       }
     ]
+  },
+  {
+    id: 1,
+    invoiceId: 38,
+    brand: "Mango Bite",
+    salespersonName: "Murali",
+    beat: "Beat 1",
+    billno: "1001.0",
+    billdate: "2024-08-31T18:30:00.000+00:00",
+    retailerName: "ABC Stores",
+    updatedInvoiceAmount: 500,
+    balance: 300,
+    amountReceived: 200,
+    cheque: 100,
+    cashDiscount: 0,
+    damage: 0,
+    claim: 0,
+    creditNote: 0,
+    gpay: 100,
+    cash: 0,
+    deliveryPerson: 0,
+    deliveryStatus: "Pending",
+    createdBy: null,
+    createdAt: null,
+    updatedBy: null,
+    updatedAt: null,
+    tallyStatus: null,
+    remarks: "123",
+    originalInvoiceAmount: 500,
+    cheques: [],
+    billsHistory: [
+      {
+        id: 79,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is Not Cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 80,
+        billId: 35,
+        paymentMethod: "Gpay",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      },
+      {
+        id: 81,
+        billId: 35,
+        paymentMethod: "Cheque",
+        receivedAmount: "100.0",
+        comments: "Updated in Bills directly Cheque Number 1234 and it is cleared",
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null
+      }
+    ]
   }
   ]);  // Set state for rows (Bills)
   const [chequeEdit, setChequeEdit] = useState(null);
@@ -136,6 +201,8 @@ export default function Home() {
     isBounced: false,
     bounceAmt: 0
   })
+
+  const [savePayload,setSavePayload]=useState({})
 
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
@@ -444,7 +511,24 @@ export default function Home() {
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
 
 
-  const handleCelleditCommit = (newRow) => {
+  const handleCelleditCommit = (newRow,oldRow) => {
+    const updatedFields = {};
+    Object.keys(newRow).forEach((field) => {
+      if (newRow[field] !== oldRow[field]) {
+        updatedFields[field] = newRow[field];
+      }
+    });
+
+    const save=_.cloneDeep(savePayload)
+    if(newRow.invoiceId in save){
+      save[newRow.invoiceId]={...save[newRow.invoiceId],...updatedFields}
+    }
+    else
+    {
+      save[newRow.invoiceId]=updatedFields
+    }
+    setSavePayload(save)
+
     setRows((prevRows) =>
       prevRows.map((row) => (row.id === newRow.id ? newRow : row))
     );
@@ -455,36 +539,26 @@ export default function Home() {
     console.log(rowSelectionModel);
     const payload = []
     rowSelectionModel.map((id) => {
-      let {
-        cashDiscount,
-        damage,
-        claim,
-        creditNote,
-        gpay,
-        partPayment,
-        delivery,
-        cancel, remarks, billno } = rows[id]
+      let invoiceId=rows[id]?.invoiceId
 
-
-      payload.push({
-        cashDiscount,
-        damage,
-        claim,
-        creditNote,
-        gpay,
-        partPayment,
-        delivery,
-        cancel,
-        remarks,
-        billno
-      })
+      payload.push({...savePayload[invoiceID],invoiceId})
     })
 
     console.log(payload);
 
+    
+
+    axios.post("http://localhost:8081/api/bill/update",payload).then(()=>{
+
+    }).catch(()=>{
+
+    })
+
 
   }
   console.log(rows);
+  console.log(savePayload);
+  
 
   const handleChequeAdd=()=>{
     let rowObj=_.cloneDeep(rows)
@@ -546,12 +620,7 @@ export default function Home() {
                   setRowSelectionModel(newRowSelectionModel);
                 }}
                 rowSelectionModel={rowSelectionModel}
-                slotProps={{
-                  loadingOverlay: {
-                    variant: 'linear-progress',
-                    noRowsVariant: 'linear-progress',
-                  },
-                }}
+                editMode='cell'
               />
             </Box>
           </div>
