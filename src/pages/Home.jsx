@@ -55,7 +55,7 @@ export default function Home() {
     tallyStatus: null,
     remarks: "123",
     originalInvoiceAmount: 500,
-    cheques: [
+    chequeHistory: [
       {
         chequeId: 15,
         bankName: "IOB",
@@ -132,7 +132,7 @@ export default function Home() {
     tallyStatus: null,
     remarks: "123",
     originalInvoiceAmount: 500,
-    cheques: [],
+    chequeHistory: [],
     billsHistory: [
       {
         id: 79,
@@ -427,7 +427,7 @@ export default function Home() {
     { field: 'billno', headerName: 'Bill No', width: 100 },
     { field: 'billdate', headerName: 'Bill Date', width: 100 },
     { field: 'retailerName', headerName: 'Retailer Name', width: 150 },
-    { field: 'invoiceAmount', headerName: 'Invoice Amount', width: 130 },
+    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', width: 130 },
     { field: 'balance', headerName: 'Balance', width: 100 },
     { field: 'amountReceived', headerName: 'Amount Received', width: 130 },
     {
@@ -454,8 +454,8 @@ export default function Home() {
     { field: 'claim', headerName: 'Claim', width: 120, editable: true },
     { field: 'creditNote', headerName: 'Credit Note', width: 130, editable: true },
     { field: 'gpay', headerName: 'GPay', width: 120, editable: true },
-    { field: 'partPayment', headerName: 'Part Payment', width: 130, editable: true },
-    { field: 'delivery', headerName: 'Delivery', width: 130, editable: true },
+    { field: 'cash', headerName: 'Cash', width: 130, editable: true },
+    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130, editable: true },
     {
 
       field: 'deliveryStatus',
@@ -541,7 +541,7 @@ export default function Home() {
     rowSelectionModel.map((id) => {
       let invoiceId=rows[id]?.invoiceId
 
-      payload.push({...savePayload[invoiceID],invoiceId})
+      payload.push({...savePayload[invoiceId],invoiceId})
     })
 
     console.log(payload);
@@ -562,8 +562,19 @@ export default function Home() {
 
   const handleChequeAdd=()=>{
     let rowObj=_.cloneDeep(rows)
-    rowObj[chequeEdit].cheques.push(chequeData)
+    rowObj[chequeEdit].chequeHistory.push(chequeData)
     setRows(rowObj)
+    let invoiceId=rowObj[chequeEdit].invoiceId
+    const save=_.cloneDeep(savePayload)
+    if(invoiceId in save){
+      save[invoiceId]={...save[invoiceId],cheques:rowObj[chequeEdit].chequeHistory}
+    }
+    else
+    {
+
+      save[invoiceId]={...save[invoiceId],cheques:rowObj[chequeEdit].chequeHistory}
+    }
+    setSavePayload(save)
     
   }
 
@@ -767,8 +778,8 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows[chequeEdit]?.cheques ?
-                      rows[chequeEdit].cheques.map((item) => (
+                    {rows[chequeEdit]?.chequeHistory ?
+                      rows[chequeEdit].chequeHistory.map((item) => (
                         <tr key={item.chequeId}>
                           <td>{item.bankName}</td>
                           <td>{item.chequeNumber}</td>
@@ -785,8 +796,7 @@ export default function Home() {
               
             </ModalBody>
             <ModalFooter>
-              <Button color="primary">Save</Button>
-              <Button onClick={toggleCheque}>Cancel</Button>
+              <Button onClick={toggleCheque}>Back</Button>
             </ModalFooter>
           </Modal>
 
