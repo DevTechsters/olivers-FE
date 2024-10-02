@@ -535,10 +535,11 @@ export default function Home() {
         ...bill,
       }));
       setRows(billsData);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching bills:', error);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -571,7 +572,7 @@ export default function Home() {
   }
 
   const saveCall = () => {
-    console.log(rowSelectionModel);
+    setLoading(true)
     const payload = []
     rowSelectionModel.map((id) => {
       let invoiceId=rows[id]?.invoiceId
@@ -584,9 +585,11 @@ export default function Home() {
     
 
     axios.post("http://localhost:8081/api/bill/update",payload).then(()=>{
-
-    }).catch(()=>{
-
+      toast.info("Saved successfully")
+      fetchBills()
+    }).catch((error)=>{
+      toast.error("Something went wrong while saving")
+      setLoading(false)
     })
 
 
@@ -627,6 +630,38 @@ export default function Home() {
     setChequeData({...chequeData,[e.target.id]:e.target.value})
   }
 
+  const handleChequeChange=(e,invoiceId,index)=>{
+    let chequeArray=_.cloneDeep(rows[chequeEdit].chequeHistory)
+
+    if(e.target.id==="isCleared")
+    {
+      chequeArray[index].isCleared=e.target.checked
+    }
+    else if(e.target.id==="isBounced")
+    {
+      chequeArray[index].isBounced=e.target.checked
+    }
+    else if(e.target.id==="bounceAmt")
+    {
+      chequeArray[index].bounceAmt=e.target.checked
+    }
+
+    let rowObj=_.cloneDeep(rows)
+
+    rowObj[chequeEdit].chequeHistory=chequeArray;
+    setRows(rowObj)
+    const save=_.cloneDeep(savePayload)
+    if(rowObj[chequeEdit].invoiceId in save){
+      save[rowObj[chequeEdit].invoiceId]={...save[rowObj[chequeEdit].invoiceId],cheques:chequeArray}
+    }
+    else
+    {
+
+      save[rowObj[chequeEdit].invoiceId]={...save[rowObj[chequeEdit].invoiceId],cheques:chequeArray}
+    }
+    setSavePayload(save)
+
+  }
 
   return (
     <>
@@ -824,15 +859,15 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {rows[chequeEdit]?.chequeHistory ?
-                      rows[chequeEdit].chequeHistory.map((item) => (
+                      rows[chequeEdit].chequeHistory.map((item,index) => (
                         <tr key={item.chequeId}>
                           <td>{item.bankName}</td>
                           <td>{item.chequeNumber}</td>
                           <td>{item.chequeDate}</td>
                           <td>{item.chequeAmount}</td>
-                          <td><input type='checkbox' value={item.isCleared} /></td>
-                          <td><input type='checkbox' value={item.isBounced}/></td>
-                          <td><input type='number' value={item.bounceAmt} /></td>
+                          <td><input type='checkbox' id="isCleared"  onChange={(e)=>handleChequeChange(e,item.chequeId,index)} checked={item.isCleared} /></td>
+                          <td><input type='checkbox' id="isBounced" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} checked={item.isBounced}/></td>
+                          <td><input type='number' id="bounceAmt" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared ||!item.isBounced} value={item.bounceAmt} /></td>
                         </tr>
                       )):null}
                   </tbody>
