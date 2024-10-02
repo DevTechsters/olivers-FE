@@ -190,6 +190,12 @@ export default function Home() {
     date: "",
     paymentMethod: ''
   });
+  const [chequeErrors, setChequeErrors] = useState({
+      bankName: "",
+      chequeNumber: "",
+      chequeDate: "",
+      chequeAmount: "",
+  });
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
   const [chequeModal, setChequeModal] = useState(false)
   const [chequeData,setChequeData]=useState({
@@ -238,12 +244,12 @@ export default function Home() {
     );
 
     // Send update to backend
-    try {
-      await axios.patch(`/api/bill/${id}`, { deliveryStatus: selectedOption.value });
-    } catch (error) {
-      console.error('Error updating delivery status:', error);
-      // Optionally, revert the local state change if the API call fails
-    }
+    // try {
+    //   await axios.patch(`/api/bill/${id}`, { deliveryStatus: selectedOption.value });
+    // } catch (error) {
+    //   console.error('Error updating delivery status:', error);
+    //   // Optionally, revert the local state change if the API call fails
+    // }
   };
 
   // Tailwind inspired custom styles for react-select
@@ -340,12 +346,30 @@ export default function Home() {
   };
 
   const handleDeleteClick = (id) => () => {
-    // Handle delete action
+    
   };
 
   const validateForm = () => {
     const newErrors = {};
     if (!addBill.receivedAmount) {
+      newErrors.receivedAmount = 'Amount is required';
+    }
+
+    if (!addBill.date) {
+      newErrors.date = 'Date is required';
+    }
+
+    if (!paymentMethod) {
+      newErrors.paymentMethod = "Payment Method is required"
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateChequeForm = () => {
+    const newErrors = {};
+    if (!chequeData.bankName) {
       newErrors.receivedAmount = 'Amount is required';
     }
 
@@ -575,6 +599,16 @@ export default function Home() {
       save[invoiceId]={...save[invoiceId],cheques:rowObj[chequeEdit].chequeHistory}
     }
     setSavePayload(save)
+
+    setChequeData({
+      bankName: "",
+      chequeNumber: "",
+      chequeDate: "",
+      chequeAmount: "",
+      isCleared: false,
+      isBounced: false,
+      bounceAmt: 0
+    })
     
   }
 
