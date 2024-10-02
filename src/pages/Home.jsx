@@ -381,18 +381,22 @@ export default function Home() {
   const validateChequeForm = () => {
     const newErrors = {};
     if (!chequeData.bankName) {
-      newErrors.receivedAmount = 'Amount is required';
+      newErrors.bankName = 'Bank name is required';
     }
 
-    if (!addBill.date) {
-      newErrors.date = 'Date is required';
+    if (!chequeData.chequeNumber) {
+      newErrors.chequeNumber = 'Cheque number is required';
     }
 
-    if (!paymentMethod) {
-      newErrors.paymentMethod = "Payment Method is required"
+    if (!chequeData.chequeDate) {
+      newErrors.chequeDate = "Cheque date is required"
     }
 
-    setErrors(newErrors);
+    if (!chequeData.chequeAmount) {
+      newErrors.chequeAmount = "Cheque Date is required"
+    }
+
+    setChequeErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -599,6 +603,11 @@ export default function Home() {
   
 
   const handleChequeAdd=()=>{
+
+    if (!validateChequeForm()) {
+      toast.error("Fill mandatory fields")
+      return;
+    }
     let rowObj=_.cloneDeep(rows)
     rowObj[chequeEdit].chequeHistory.push(chequeData)
     setRows(rowObj)
@@ -826,19 +835,23 @@ export default function Home() {
               <Row>
                 <Col>
                   <Label>Bank Name</Label>
-                  <Input type='text' id='bankName' onChange={handleCheque}/>
+                  <Input type='text' id='bankName' onChange={handleCheque} invalid={!!chequeErrors.bankName}/>
+                  {chequeErrors.bankName && <FormFeedback>{chequeErrors.bankName}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Cheque Number</Label>
-                  <Input type='text' id="chequeNumber"  onChange={handleCheque} />
+                  <Input type='text' id="chequeNumber"  onChange={handleCheque} invalid={!!chequeErrors.chequeNumber}/>
+                  {chequeErrors.chequeNumber && <FormFeedback>{chequeErrors.chequeNumber}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Cheque Date</Label>
-                  <Input type='date' id='chequeDate' onChange={handleCheque}/>
+                  <Input type='date' id='chequeDate' onChange={handleCheque} invalid={!!chequeErrors.chequeDate}/>
+                  {chequeErrors.chequeDate && <FormFeedback>{chequeErrors.chequeDate}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Amount</Label>
-                  <Input type='number' id="chequeAmount" onChange={handleCheque} />
+                  <Input type='number' id="chequeAmount" onChange={handleCheque} invalid={!!chequeErrors.chequeAmount}/>
+                  {chequeErrors.chequeAmount && <FormFeedback>{chequeErrors.chequeAmount}</FormFeedback>}
                 </Col>
                 <Col>
                   <Button color="primary" onClick={handleChequeAdd}>Add</Button>
