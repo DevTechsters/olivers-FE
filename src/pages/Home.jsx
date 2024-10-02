@@ -441,6 +441,7 @@ export default function Home() {
     {
       field: 'actions',
       type: 'actions',
+      headerAlign: 'center',
       headerName: 'Actions',
       width: 150,
       cellClassName: 'actions',
@@ -460,17 +461,17 @@ export default function Home() {
         />,
       ],
     },
-    { field: 'brand', headerName: 'Brand', width: 120 },
-    { field: 'salespersonName', headerName: 'Salesperson Name', width: 150 },
-    { field: 'beat', headerName: 'Beat', width: 120 },
-    { field: 'billno', headerName: 'Bill No', width: 100 },
-    { field: 'billdate', headerName: 'Bill Date', width: 100 },
-    { field: 'retailerName', headerName: 'Retailer Name', width: 150 },
-    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', width: 130 },
-    { field: 'balance', headerName: 'Balance', width: 100 },
-    { field: 'amountReceived', headerName: 'Amount Received', width: 130 },
+    { field: 'brand', headerName: 'Brand', headerAlign: 'center',width: 120 },
+    { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center',width: 150 },
+    { field: 'beat', headerName: 'Beat', headerAlign: 'center',width: 120 },
+    { field: 'billno', headerName: 'Bill No', headerAlign: 'center',width: 100 },
+    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 },
+    { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center',width: 150 },
+    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', headerAlign: 'center',width: 130 },
+    { field: 'balance', headerName: 'Balance', headerAlign: 'center',width: 100 },
+    { field: 'amountReceived', headerName: 'Amount Received', headerAlign: 'center',width: 130 },
     {
-      field: 'cheque', headerName: 'Cheque', width: 120, editable: true,
+      field: 'cheque', headerName: 'Cheque', headerAlign: 'center',width: 120, editable: true,
       renderCell: (params,row) => {
         return (
           <>
@@ -488,18 +489,19 @@ export default function Home() {
         )
       },
     },
-    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130, editable: true },
-    { field: 'damage', headerName: 'Damage', width: 120, editable: true },
-    { field: 'claim', headerName: 'Claim', width: 120, editable: true },
-    { field: 'creditNote', headerName: 'Credit Note', width: 130, editable: true },
-    { field: 'gpay', headerName: 'GPay', width: 120, editable: true },
-    { field: 'cash', headerName: 'Cash', width: 130, editable: true },
-    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130, editable: true },
+    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130,headerAlign: 'center', editable: true },
+    { field: 'damage', headerName: 'Damage', width: 120,headerAlign: 'center', editable: true },
+    { field: 'claim', headerName: 'Claim', width: 120,headerAlign: 'center', editable: true },
+    { field: 'creditNote', headerName: 'Credit Note', width: 130,headerAlign: 'center', editable: true },
+    { field: 'gpay', headerName: 'GPay', width: 120,headerAlign: 'center', editable: true },
+    { field: 'cash', headerName: 'Cash', width: 130,headerAlign: 'center', editable: true },
+    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130,headerAlign: 'center', editable: true },
     {
 
       field: 'deliveryStatus',
       headerName: 'Delivery Status',
       width: 200,
+      headerAlign: 'center',
       editable: true,
       renderCell: (params) => {
         const status = deliveryStatusOptions.find(option => option.value === params.value);
@@ -520,12 +522,12 @@ export default function Home() {
       },
     },
 
-    { field: 'remarks', headerName: 'Remarks', width: 180, editable: true },
-    { field: 'createdBy', headerName: 'Created By', width: 130 },
-    { field: 'createdAt', headerName: 'Created At', width: 100 },
-    { field: 'updatedBy', headerName: 'Updated By', width: 100 },
-    { field: 'updatedAt', headerName: 'Updated At', width: 130 },
-    { field: 'tallyStatus', headerName: 'Tally Status', width: 130 },
+    { field: 'remarks', headerName: 'Remarks', width: 180,headerAlign: 'center', editable: true },
+    { field: 'createdBy', headerName: 'Created By',headerAlign: 'center', width: 130 },
+    { field: 'createdAt', headerName: 'Created At',headerAlign: 'center', width: 100 },
+    { field: 'updatedBy', headerName: 'Updated By',headerAlign: 'center', width: 100 },
+    { field: 'updatedAt', headerName: 'Updated At',headerAlign: 'center', width: 130 },
+    { field: 'tallyStatus', headerName: 'Tally Status',headerAlign: 'center', width: 130 },
   ];
 
   const fetchBills = async () => {
@@ -721,6 +723,17 @@ export default function Home() {
                 }}
                 rowSelectionModel={rowSelectionModel}
                 editMode='cell'
+                getRowClassName={(params) => {
+                  if (params.row.deliveryStatus ==="Pending") {
+                    return 'bg-red-200';  
+                  } else if (params.row.deliveryStatus ==="Partially Delivered") {
+                    return 'bg-yellow-200';  
+                  } else if (params.row.deliveryStatus ==="Delivered") {
+                    return 'bg-green-200';  
+                  } else {
+                    return 'bg-blue-200';  
+                  }
+                }}
               />
             </Box>
           </div>
