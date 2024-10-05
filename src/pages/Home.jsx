@@ -16,6 +16,7 @@ import Select from 'react-select';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
+import dayjs from 'dayjs';
 
 
 
@@ -721,7 +722,19 @@ export default function Home() {
     { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center',width: 150 },
     { field: 'beat', headerName: 'Beat', headerAlign: 'center',width: 120 },
     { field: 'billno', headerName: 'Bill No', headerAlign: 'center',width: 100 },
-    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 },
+    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 ,valueFormatter: (params) => dayjs(params.value).format('DD/MM/YYYY')},
+    {
+      field: 'dueday',
+      headerName: 'Due days',
+      width: 120,
+      renderCell: (params) => {
+        const dateA = dayjs(params.row.billdate); 
+        const currentDate = dayjs();
+        const diff = dateA.diff(currentDate, 'day'); 
+  
+        return diff >= 0 ?diff :Math.abs(diff); 
+      },
+    },
     { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center',width: 150 },
     { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', headerAlign: 'center',width: 130 },
     { field: 'balance', headerName: 'Balance', headerAlign: 'center',width: 100 },
@@ -764,7 +777,7 @@ export default function Home() {
         return (
           <Select
             value={status}
-            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id,params.row.invoiceIdid)}
+            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id,params.row.invoiceId)}
             options={deliveryStatusOptions}
             styles={customSelectStyles}
             placeholder="Select status"
@@ -930,6 +943,18 @@ export default function Home() {
 
   }
 
+  const getRowBgColor = (row) => {
+    if (row.isBounced) {
+      return 'table-danger'; // light red
+    } 
+    else if (row.isCleared) {
+      return "table-success"; // light green
+    } 
+    else {
+      return "table-primary" ; // violet
+    } 
+  };
+
   return (
     <>
       {loading ? (
@@ -981,13 +1006,13 @@ export default function Home() {
                 editMode='cell'
                 getRowClassName={(params) => {
                   if (params.row.deliveryStatus ==="Pending") {
-                    return 'bg-red-200';  
+                    return 'bg-lightRed';  
                   } else if (params.row.deliveryStatus ==="Partially Delivered") {
-                    return 'bg-yellow-200';  
+                    return 'bg-yellowCustom';  
                   } else if (params.row.deliveryStatus ==="Delivered") {
-                    return 'bg-green-200';  
+                    return 'bg-lightGreen';  
                   } else {
-                    return 'bg-blue-200';  
+                    return 'bg-violetCustom';  
                   }
                 }}
               />
@@ -1127,7 +1152,7 @@ export default function Home() {
                 </Col>
               </Row>
               <div className="m-2 p-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <Table bordered hover responsive striped>
+                <Table bordered hover responsive >
                   <thead>
                     <tr>
                       <th>Bank Name</th>
@@ -1142,13 +1167,13 @@ export default function Home() {
                   <tbody>
                     {rows[chequeEdit]?.chequeHistory ?
                       rows[chequeEdit].chequeHistory.map((item,index) => (
-                        <tr key={item.chequeId}>
+                        <tr key={item.chequeId} className={getRowBgColor(item)}>
                           <td>{item.bankName}</td>
                           <td>{item.chequeNumber}</td>
-                          <td>{item.chequeDate}</td>
+                          <td>{dayjs(item.chequeDate).format("DD/MM/YYYY")}</td>
                           <td>{item.chequeAmount}</td>
-                          <td><input type='checkbox' id="isCleared"  onChange={(e)=>handleChequeChange(e,item.chequeId,index)} checked={item.isCleared} /></td>
-                          <td><input type='checkbox' id="isBounced" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} checked={item.isBounced}/></td>
+                          <td><input type='checkbox' id="isCleared"  onChange={(e)=>handleChequeChange(e,item.chequeId,index)}  disabled={item.isBounced} checked={item.isCleared} /></td>
+                          <td><input type='checkbox' id="isBounced" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared} checked={item.isBounced}/></td>
                           <td><input type='number' id="bounceAmt" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared ||!item.isBounced} value={item.bounceAmt} /></td>
                         </tr>
                       )):null}
