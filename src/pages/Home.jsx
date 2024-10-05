@@ -16,7 +16,7 @@ import Select from 'react-select';
 import { toast } from 'react-toastify';
 import _ from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
-import dayjs from 'dayjs';
+import moment from 'moment';
 
 
 
@@ -737,17 +737,18 @@ export default function Home() {
     { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center',width: 150 },
     { field: 'beat', headerName: 'Beat', headerAlign: 'center',width: 120 },
     { field: 'billno', headerName: 'Bill No', headerAlign: 'center',width: 100 },
-    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 ,valueFormatter: (params) => dayjs(params.value).format('DD/MM/YYYY')},
+    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 ,renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY'); }},
     {
       field: 'dueday',
       headerName: 'Due days',
       width: 120,
       renderCell: (params) => {
-        const dateA = dayjs(params.row.billdate); 
-        const currentDate = dayjs();
-        const diff = dateA.diff(currentDate, 'day'); 
+        const billDate = moment(params.row.billdate); // Parse the bill date
+        const currentDate = moment(); // Get the current date
+        const diff = billDate.diff(currentDate, 'days'); // Calculate difference in days
   
-        return diff >= 0 ?diff :Math.abs(diff); 
+        // Return the absolute value of the difference
+        return diff >= 0 ? diff : Math.abs(diff);
       },
     },
     { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center',width: 150 },
@@ -806,12 +807,16 @@ export default function Home() {
       },
     },
 
-    { field: 'remarks', headerName: 'Remarks', width: 180,headerAlign: 'center', editable: true },
-    { field: 'createdBy', headerName: 'Created By',headerAlign: 'center', width: 130 },
-    { field: 'createdAt', headerName: 'Created At',headerAlign: 'center', width: 100 },
-    { field: 'updatedBy', headerName: 'Updated By',headerAlign: 'center', width: 100 },
-    { field: 'updatedAt', headerName: 'Updated At',headerAlign: 'center', width: 130 },
-    { field: 'tallyStatus', headerName: 'Tally Status',headerAlign: 'center', width: 130 },
+    { field: 'remarks', headerName: 'Remarks', width: 180, headerAlign: 'center', editable: true },
+    { field: 'createdBy', headerName: 'Created By', headerAlign: 'center', width: 130 },
+    {
+      field: 'createdAt', headerName: 'Created At', headerAlign: 'center', width: 100, renderCell: (params) => {
+        return moment(params.value).format('DD/MM/YYYY hh:mm a');
+      }
+    },
+    { field: 'updatedBy', headerName: 'Updated By', headerAlign: 'center', width: 100 },
+    { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') }},
+    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130 },
   ];
 
   const fetchBills = async () => {
@@ -824,6 +829,9 @@ export default function Home() {
         id: index,  // Assign an ID for each row
         ...bill,
       }));
+
+
+
       setRows(billsData);
       setLoading(false);
     } catch (error) {
@@ -1052,10 +1060,15 @@ export default function Home() {
                   <Col>
                     <Label>Payment Method *</Label>
                     <Select
-                      options={[
-                        { value: 'Gpay', label: 'Gpay' },
-                        { value: 'Cash', label: 'Cash' },
-                        { value: 'Cheque', label: 'Cheque' },
+                      options={ [
+                        { value: 'CHEQUE', label: 'Cheque' },
+                        { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
+                        { value: 'DAMAGE', label: 'Damage' },
+                        { value: 'CLAIM', label: 'Claim' },
+                        { value: 'CREDIT_NOTE', label: 'Credit Note' },
+                        { value: 'GPAY', label: 'Gpay' },
+                        { value: 'CASH', label: 'Cash' },
+                        { value: 'DELIVERY_PERSON', label: 'Delivery Person' },
                       ]}
                       onChange={handlePaymentMethod}
                     />
@@ -1087,12 +1100,12 @@ export default function Home() {
                     {BillsHistory &&
                       BillsHistory.map((item, idx) => (
                         <tr key={idx}>
-                          <td>{item.date}</td>
+                          <td>{moment(item.date).format("DD/MM/YYYY")}</td>
                           <td>{item.paymentMethod}</td>
                           <td>{item.receivedAmount}</td>
                           <td>{item.comments}</td>
                           <td>{item.createdBy}</td>
-                          <td>{item.createdAt}</td>
+                          <td>{moment(item.createdAt).format('DD/MM/YYYY hh:mm a')}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -1181,7 +1194,7 @@ export default function Home() {
                         <tr key={item.chequeId} className={getRowBgColor(item)}>
                           <td>{item.bankName}</td>
                           <td>{item.chequeNumber}</td>
-                          <td>{dayjs(item.chequeDate).format("DD/MM/YYYY")}</td>
+                          <td>{moment(item.chequeDate).format("DD/MM/YYYY")}</td>
                           <td>{item.chequeAmount}</td>
                           <td><input type='checkbox' id="isCleared"  onChange={(e)=>handleChequeChange(e,item.chequeId,index)}  disabled={item.isBounced} checked={item.isCleared} /></td>
                           <td><input type='checkbox' id="isBounced" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared} checked={item.isBounced}/></td>
