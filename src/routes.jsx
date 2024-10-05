@@ -6,6 +6,7 @@ import SignupPage from './pages/SignupPage';
 import { useSelector } from 'react-redux';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const ProtectedRoute = ({ element }) => {
 
@@ -17,19 +18,19 @@ const ProtectedRoute = ({ element }) => {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginPage />,
+    element:<ErrorBoundary> <LoginPage /></ErrorBoundary>,
   },
   {
     path: "/signup",
-    element: <SignupPage />,
+    element: <ErrorBoundary><SignupPage /></ErrorBoundary>,
   },
   {
     path: "/home",
-    element: <ProtectedRoute element={<Home/>} />,
+    element:<ErrorBoundary><ProtectedRoute element={<Home/>} /> </ErrorBoundary>,
   },
   {
     path: "/upload",
-    element: <ProtectedRoute element={<Upload/>} />,
+    element:<ErrorBoundary> <ProtectedRoute element={<Upload/>} /></ErrorBoundary>,
   },
 ]);
 

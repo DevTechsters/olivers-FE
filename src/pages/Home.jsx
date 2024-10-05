@@ -508,20 +508,7 @@ export default function Home() {
       save[invoiceId]={...save[invoiceId],deliveryStatus: selectedOption.value}
     }
     setSavePayload(save)
-
-
-
-    // Send update to backend
-    // try {
-    //   await axios.patch(`/api/bill/${id}`, { deliveryStatus: selectedOption.value });
-    // } catch (error) {
-    //   console.error('Error updating delivery status:', error);
-    //   // Optionally, revert the local state change if the API call fails
-    // }
   };
-
-  // Tailwind inspired custom styles for react-select
-  // Tailwind inspired custom styles for react-select
   const customSelectStyles = {
     control: (provided, state) => ({
       ...provided,
@@ -595,12 +582,40 @@ export default function Home() {
   }
 
   const toggleCheque = () => {
-    setChequeModal(!chequeModal)
+    if(chequeModal===true)
+    {
+      if(validateCheque())
+      {
+        setChequeModal(!chequeModal)
+      }
+      else
+      {
+        toast.error("Please fill cheque bounce amount")
+      }
+    }
+    else
+    {
+      setChequeModal(!chequeModal)
+    }
   }
 
 
   const handleAddbill = (e) => {
     setAddbill({ ...addBill, [e.target.id]: e.target.value })
+  }
+
+  const validateCheque=()=>{
+    let arr=rows[chequeEdit].chequeHistory
+    let valid=true
+
+    arr.map((item)=>{
+      if(item.isBounced && !item.bounceAmt)
+      {
+        valid=false
+      }
+    })
+
+    return valid
   }
 
   const handlePaymentMethod = (e) => {
@@ -923,7 +938,7 @@ export default function Home() {
     }
     else if(e.target.id==="bounceAmt")
     {
-      chequeArray[index].bounceAmt=e.target.checked
+      chequeArray[index].bounceAmt=parseInt(e.target.value)
     }
 
     let rowObj=_.cloneDeep(rows)
@@ -1066,8 +1081,6 @@ export default function Home() {
                       <th>Comments</th>
                       <th>Created by</th>
                       <th>Created At</th>
-                      <th>Updated by</th>
-                      <th>Updated At</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1080,8 +1093,6 @@ export default function Home() {
                           <td>{item.comments}</td>
                           <td>{item.createdBy}</td>
                           <td>{item.createdAt}</td>
-                          <td>{item.updatedBy}</td>
-                          <td>{item.updatedAt}</td>
                         </tr>
                       ))}
                   </tbody>
