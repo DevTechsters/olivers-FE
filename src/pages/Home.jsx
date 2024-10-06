@@ -441,6 +441,28 @@ export default function Home() {
     option2: null,
     option3: null,
   });
+  const [filterConst, setFiterConst] = useState({
+    salespersonNames: [
+      "Mohan",
+      "Naveen",
+      "Murali"
+    ],
+    retailerNames: [
+      "ABC Stores",
+      "GHI Stores",
+      "DEF Stores"
+    ],
+    beats: [
+      "Beat 2",
+      "Beat 3",
+      "Beat 1"
+    ],
+    brandNames: [
+      "Mango Bite",
+      "Diary Milk",
+      "Coffee Bite"
+    ]
+  })
   const [editPayload, setEditPayload] = useState([])
   const [errors, setErrors] = useState({
     receivedAmount: '',
@@ -448,14 +470,14 @@ export default function Home() {
     paymentMethod: ''
   });
   const [chequeErrors, setChequeErrors] = useState({
-      bankName: "",
-      chequeNumber: "",
-      chequeDate: "",
-      chequeAmount: "",
+    bankName: "",
+    chequeNumber: "",
+    chequeDate: "",
+    chequeAmount: "",
   });
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
   const [chequeModal, setChequeModal] = useState(false)
-  const [chequeData,setChequeData]=useState({
+  const [chequeData, setChequeData] = useState({
     bankName: "",
     chequeNumber: "",
     chequeDate: "",
@@ -465,7 +487,7 @@ export default function Home() {
     bounceAmt: 0
   })
 
-  const [savePayload,setSavePayload]=useState({})
+  const [savePayload, setSavePayload] = useState({})
 
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
@@ -492,20 +514,19 @@ export default function Home() {
   ];
   // Handle delivery status change
   // Handle delivery status change
-  const handleDeliveryStatusChange =(selectedOption, id,invoiceId) => {
+  const handleDeliveryStatusChange = (selectedOption, id, invoiceId) => {
     // Update local state
     setRows(prevRows =>
       prevRows.map(row =>
         row.id === id ? { ...row, deliveryStatus: selectedOption.value } : row
       )
     );
-    const save=_.cloneDeep(savePayload)
-    if(invoiceId in save){
-      save[invoiceId]={...save[invoiceId],deliveryStatus: selectedOption.value}
+    const save = _.cloneDeep(savePayload)
+    if (invoiceId in save) {
+      save[invoiceId] = { ...save[invoiceId], deliveryStatus: selectedOption.value }
     }
-    else
-    {
-      save[invoiceId]={...save[invoiceId],deliveryStatus: selectedOption.value}
+    else {
+      save[invoiceId] = { ...save[invoiceId], deliveryStatus: selectedOption.value }
     }
     setSavePayload(save)
   };
@@ -582,19 +603,15 @@ export default function Home() {
   }
 
   const toggleCheque = () => {
-    if(chequeModal===true)
-    {
-      if(validateCheque())
-      {
+    if (chequeModal === true) {
+      if (validateCheque()) {
         setChequeModal(!chequeModal)
       }
-      else
-      {
+      else {
         toast.error("Please fill cheque bounce amount")
       }
     }
-    else
-    {
+    else {
       setChequeModal(!chequeModal)
     }
   }
@@ -604,14 +621,13 @@ export default function Home() {
     setAddbill({ ...addBill, [e.target.id]: e.target.value })
   }
 
-  const validateCheque=()=>{
-    let arr=rows[chequeEdit].chequeHistory
-    let valid=true
+  const validateCheque = () => {
+    let arr = rows[chequeEdit].chequeHistory
+    let valid = true
 
-    arr.map((item)=>{
-      if(item.isBounced && !item.bounceAmt)
-      {
-        valid=false
+    arr.map((item) => {
+      if (item.isBounced && !item.bounceAmt) {
+        valid = false
       }
     })
 
@@ -629,7 +645,7 @@ export default function Home() {
   };
 
   const handleDeleteClick = (id) => () => {
-    
+
   };
 
   const validateForm = () => {
@@ -733,11 +749,11 @@ export default function Home() {
         />,
       ],
     },
-    { field: 'brand', headerName: 'Brand', headerAlign: 'center',width: 120 },
-    { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center',width: 150 },
-    { field: 'beat', headerName: 'Beat', headerAlign: 'center',width: 120 },
-    { field: 'billno', headerName: 'Bill No', headerAlign: 'center',width: 100 },
-    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center',width: 100 ,renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY'); }},
+    { field: 'brand', headerName: 'Brand', headerAlign: 'center', width: 120 },
+    { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center', width: 150 },
+    { field: 'beat', headerName: 'Beat', headerAlign: 'center', width: 120 },
+    { field: 'billno', headerName: 'Bill No', headerAlign: 'center', width: 100 },
+    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center', width: 100, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY'); } },
     {
       field: 'dueday',
       headerName: 'Due days',
@@ -746,25 +762,25 @@ export default function Home() {
         const billDate = moment(params.row.billdate); // Parse the bill date
         const currentDate = moment(); // Get the current date
         const diff = billDate.diff(currentDate, 'days'); // Calculate difference in days
-  
+
         // Return the absolute value of the difference
         return diff >= 0 ? diff : Math.abs(diff);
       },
     },
-    { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center',width: 150 },
-    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', headerAlign: 'center',width: 130 },
-    { field: 'balance', headerName: 'Balance', headerAlign: 'center',width: 100 },
-    { field: 'amountReceived', headerName: 'Amount Received', headerAlign: 'center',width: 130 },
+    { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center', width: 150 },
+    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', headerAlign: 'center', width: 130 },
+    { field: 'balance', headerName: 'Balance', headerAlign: 'center', width: 100 },
+    { field: 'amountReceived', headerName: 'Amount Received', headerAlign: 'center', width: 130 },
     {
-      field: 'cheque', headerName: 'Cheque', headerAlign: 'center',width: 120, editable: true,
-      renderCell: (params,row) => {
+      field: 'cheque', headerName: 'Cheque', headerAlign: 'center', width: 120, editable: true,
+      renderCell: (params, row) => {
         return (
           <>
             <p>{params.value} <GridActionsCellItem
               icon={<EditIcon />}
               label="Edit"
               className="textPrimary"
-              onClick={(e)=>{
+              onClick={(e) => {
                 setChequeEdit(params.id)
                 toggleCheque()
               }}
@@ -774,13 +790,13 @@ export default function Home() {
         )
       },
     },
-    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130,headerAlign: 'center', editable: true },
-    { field: 'damage', headerName: 'Damage', width: 120,headerAlign: 'center', editable: true },
-    { field: 'claim', headerName: 'Claim', width: 120,headerAlign: 'center', editable: true },
-    { field: 'creditNote', headerName: 'Credit Note', width: 130,headerAlign: 'center', editable: true },
-    { field: 'gpay', headerName: 'GPay', width: 120,headerAlign: 'center', editable: true },
-    { field: 'cash', headerName: 'Cash', width: 130,headerAlign: 'center', editable: true },
-    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130,headerAlign: 'center', editable: true },
+    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130, headerAlign: 'center', editable: true },
+    { field: 'damage', headerName: 'Damage', width: 120, headerAlign: 'center', editable: true },
+    { field: 'claim', headerName: 'Claim', width: 120, headerAlign: 'center', editable: true },
+    { field: 'creditNote', headerName: 'Credit Note', width: 130, headerAlign: 'center', editable: true },
+    { field: 'gpay', headerName: 'GPay', width: 120, headerAlign: 'center', editable: true },
+    { field: 'cash', headerName: 'Cash', width: 130, headerAlign: 'center', editable: true },
+    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130, headerAlign: 'center', editable: true },
     {
 
       field: 'deliveryStatus',
@@ -793,7 +809,7 @@ export default function Home() {
         return (
           <Select
             value={status}
-            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id,params.row.invoiceId)}
+            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id, params.row.invoiceId)}
             options={deliveryStatusOptions}
             styles={customSelectStyles}
             placeholder="Select status"
@@ -815,7 +831,7 @@ export default function Home() {
       }
     },
     { field: 'updatedBy', headerName: 'Updated By', headerAlign: 'center', width: 100 },
-    { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') }},
+    { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') } },
     { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130 },
   ];
 
@@ -840,12 +856,25 @@ export default function Home() {
     }
   };
 
+  const fetchFilterData=async()=>{
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:8081/api/bill/filter")
+      setFiterConst(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching bills:', error);
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     fetchBills(); // Initial data fetch
+    fetchFilterData()
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
 
 
-  const handleCelleditCommit = (newRow,oldRow) => {
+  const handleCelleditCommit = (newRow, oldRow) => {
     const updatedFields = {};
     Object.keys(newRow).forEach((field) => {
       if (newRow[field] !== oldRow[field]) {
@@ -853,13 +882,12 @@ export default function Home() {
       }
     });
 
-    const save=_.cloneDeep(savePayload)
-    if(newRow.invoiceId in save){
-      save[newRow.invoiceId]={...save[newRow.invoiceId],...updatedFields}
+    const save = _.cloneDeep(savePayload)
+    if (newRow.invoiceId in save) {
+      save[newRow.invoiceId] = { ...save[newRow.invoiceId], ...updatedFields }
     }
-    else
-    {
-      save[newRow.invoiceId]=updatedFields
+    else {
+      save[newRow.invoiceId] = updatedFields
     }
     setSavePayload(save)
 
@@ -873,19 +901,19 @@ export default function Home() {
     setLoading(true)
     const payload = []
     rowSelectionModel.map((id) => {
-      let invoiceId=rows[id]?.invoiceId
+      let invoiceId = rows[id]?.invoiceId
 
-      payload.push({...savePayload[invoiceId],invoiceId})
+      payload.push({ ...savePayload[invoiceId], invoiceId })
     })
 
     console.log(payload);
 
-    
 
-    axios.post("http://localhost:8081/api/bill/update",payload).then(()=>{
+
+    axios.post("http://localhost:8081/api/bill/update", payload).then(() => {
       toast.info("Saved successfully")
       fetchBills()
-    }).catch((error)=>{
+    }).catch((error) => {
       toast.error("Something went wrong while saving")
       setLoading(false)
     })
@@ -894,26 +922,25 @@ export default function Home() {
   }
   console.log(rows);
   console.log(savePayload);
-  
 
-  const handleChequeAdd=()=>{
+
+  const handleChequeAdd = () => {
 
     if (!validateChequeForm()) {
       toast.error("Fill mandatory fields")
       return;
     }
-    let rowObj=_.cloneDeep(rows)
+    let rowObj = _.cloneDeep(rows)
     rowObj[chequeEdit].chequeHistory.push(chequeData)
     setRows(rowObj)
-    let invoiceId=rowObj[chequeEdit].invoiceId
-    const save=_.cloneDeep(savePayload)
-    if(invoiceId in save){
-      save[invoiceId]={...save[invoiceId],cheques:rowObj[chequeEdit].chequeHistory}
+    let invoiceId = rowObj[chequeEdit].invoiceId
+    const save = _.cloneDeep(savePayload)
+    if (invoiceId in save) {
+      save[invoiceId] = { ...save[invoiceId], cheques: rowObj[chequeEdit].chequeHistory }
     }
-    else
-    {
+    else {
 
-      save[invoiceId]={...save[invoiceId],cheques:rowObj[chequeEdit].chequeHistory}
+      save[invoiceId] = { ...save[invoiceId], cheques: rowObj[chequeEdit].chequeHistory }
     }
     setSavePayload(save)
 
@@ -926,41 +953,37 @@ export default function Home() {
       isBounced: false,
       bounceAmt: 0
     })
-    
+
   }
 
-  const handleCheque=(e)=>{
-    setChequeData({...chequeData,[e.target.id]:e.target.value})
+  const handleCheque = (e) => {
+    setChequeData({ ...chequeData, [e.target.id]: e.target.value })
   }
 
-  const handleChequeChange=(e,invoiceId,index)=>{
-    let chequeArray=_.cloneDeep(rows[chequeEdit].chequeHistory)
+  const handleChequeChange = (e, invoiceId, index) => {
+    let chequeArray = _.cloneDeep(rows[chequeEdit].chequeHistory)
 
-    if(e.target.id==="isCleared")
-    {
-      chequeArray[index].isCleared=e.target.checked
+    if (e.target.id === "isCleared") {
+      chequeArray[index].isCleared = e.target.checked
     }
-    else if(e.target.id==="isBounced")
-    {
-      chequeArray[index].isBounced=e.target.checked
+    else if (e.target.id === "isBounced") {
+      chequeArray[index].isBounced = e.target.checked
     }
-    else if(e.target.id==="bounceAmt")
-    {
-      chequeArray[index].bounceAmt=parseInt(e.target.value)
+    else if (e.target.id === "bounceAmt") {
+      chequeArray[index].bounceAmt = parseInt(e.target.value)
     }
 
-    let rowObj=_.cloneDeep(rows)
+    let rowObj = _.cloneDeep(rows)
 
-    rowObj[chequeEdit].chequeHistory=chequeArray;
+    rowObj[chequeEdit].chequeHistory = chequeArray;
     setRows(rowObj)
-    const save=_.cloneDeep(savePayload)
-    if(rowObj[chequeEdit].invoiceId in save){
-      save[rowObj[chequeEdit].invoiceId]={...save[rowObj[chequeEdit].invoiceId],cheques:chequeArray}
+    const save = _.cloneDeep(savePayload)
+    if (rowObj[chequeEdit].invoiceId in save) {
+      save[rowObj[chequeEdit].invoiceId] = { ...save[rowObj[chequeEdit].invoiceId], cheques: chequeArray }
     }
-    else
-    {
+    else {
 
-      save[rowObj[chequeEdit].invoiceId]={...save[rowObj[chequeEdit].invoiceId],cheques:chequeArray}
+      save[rowObj[chequeEdit].invoiceId] = { ...save[rowObj[chequeEdit].invoiceId], cheques: chequeArray }
     }
     setSavePayload(save)
 
@@ -969,13 +992,13 @@ export default function Home() {
   const getRowBgColor = (row) => {
     if (row.isBounced) {
       return 'table-danger'; // light red
-    } 
+    }
     else if (row.isCleared) {
       return "table-success"; // light green
-    } 
+    }
     else {
-      return "table-primary" ; // violet
-    } 
+      return "table-primary"; // violet
+    }
   };
 
   return (
@@ -1028,14 +1051,14 @@ export default function Home() {
                 rowSelectionModel={rowSelectionModel}
                 editMode='cell'
                 getRowClassName={(params) => {
-                  if (params.row.deliveryStatus ==="Pending") {
-                    return 'bg-lightRed';  
-                  } else if (params.row.deliveryStatus ==="Partially Delivered") {
-                    return 'bg-yellowCustom';  
-                  } else if (params.row.deliveryStatus ==="Delivered") {
-                    return 'bg-lightGreen';  
+                  if (params.row.deliveryStatus === "Pending") {
+                    return 'bg-lightRed';
+                  } else if (params.row.deliveryStatus === "Partially Delivered") {
+                    return 'bg-yellowCustom';
+                  } else if (params.row.deliveryStatus === "Delivered") {
+                    return 'bg-lightGreen';
                   } else {
-                    return 'bg-violetCustom';  
+                    return 'bg-violetCustom';
                   }
                 }}
               />
@@ -1060,7 +1083,7 @@ export default function Home() {
                   <Col>
                     <Label>Payment Method *</Label>
                     <Select
-                      options={ [
+                      options={[
                         { value: 'CHEQUE', label: 'Cheque' },
                         { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
                         { value: 'DAMAGE', label: 'Damage' },
@@ -1123,11 +1146,39 @@ export default function Home() {
               <div className="m-2 p-2">
                 <Row>
                   <Label>Salesperson Name</Label>
-                  <Select />
+                  <Select
+                    options={filterConst.salespersonNames.map((name)=>{
+                      return {label:name,value:name}
+                    })}
+                    isSearchable
+                   />
                 </Row>
                 <Row>
                   <Label>Retailer Name</Label>
-                  <Select />
+                  <Select
+                    options={filterConst.retailerNames.map((name)=>{
+                      return {label:name,value:name}
+                    })}
+                    isSearchable
+                   />
+                </Row>
+                <Row>
+                  <Label>Beats</Label>
+                  <Select
+                    options={filterConst.beats.map((name)=>{
+                      return {label:name,value:name}
+                    })}
+                    isSearchable
+                   />
+                </Row>
+                <Row>
+                  <Label>Brand name</Label>
+                  <Select
+                    options={filterConst.brandNames.map((name)=>{
+                      return {label:name,value:name}
+                    })}
+                    isSearchable
+                   />
                 </Row>
                 <Row>
                   <Col>
@@ -1153,22 +1204,22 @@ export default function Home() {
               <Row>
                 <Col>
                   <Label>Bank Name</Label>
-                  <Input type='text' id='bankName' onChange={handleCheque} invalid={!!chequeErrors.bankName}/>
+                  <Input type='text' id='bankName' onChange={handleCheque} invalid={!!chequeErrors.bankName} />
                   {chequeErrors.bankName && <FormFeedback>{chequeErrors.bankName}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Cheque Number</Label>
-                  <Input type='text' id="chequeNumber"  onChange={handleCheque} invalid={!!chequeErrors.chequeNumber}/>
+                  <Input type='text' id="chequeNumber" onChange={handleCheque} invalid={!!chequeErrors.chequeNumber} />
                   {chequeErrors.chequeNumber && <FormFeedback>{chequeErrors.chequeNumber}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Cheque Date</Label>
-                  <Input type='date' id='chequeDate' onChange={handleCheque} invalid={!!chequeErrors.chequeDate}/>
+                  <Input type='date' id='chequeDate' onChange={handleCheque} invalid={!!chequeErrors.chequeDate} />
                   {chequeErrors.chequeDate && <FormFeedback>{chequeErrors.chequeDate}</FormFeedback>}
                 </Col>
                 <Col>
                   <Label>Amount</Label>
-                  <Input type='number' id="chequeAmount" onChange={handleCheque} invalid={!!chequeErrors.chequeAmount}/>
+                  <Input type='number' id="chequeAmount" onChange={handleCheque} invalid={!!chequeErrors.chequeAmount} />
                   {chequeErrors.chequeAmount && <FormFeedback>{chequeErrors.chequeAmount}</FormFeedback>}
                 </Col>
                 <Col>
@@ -1190,21 +1241,21 @@ export default function Home() {
                   </thead>
                   <tbody>
                     {rows[chequeEdit]?.chequeHistory ?
-                      rows[chequeEdit].chequeHistory.map((item,index) => (
+                      rows[chequeEdit].chequeHistory.map((item, index) => (
                         <tr key={item.chequeId} className={getRowBgColor(item)}>
                           <td>{item.bankName}</td>
                           <td>{item.chequeNumber}</td>
                           <td>{moment(item.chequeDate).format("DD/MM/YYYY")}</td>
                           <td>{item.chequeAmount}</td>
-                          <td><input type='checkbox' id="isCleared"  onChange={(e)=>handleChequeChange(e,item.chequeId,index)}  disabled={item.isBounced} checked={item.isCleared} /></td>
-                          <td><input type='checkbox' id="isBounced" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared} checked={item.isBounced}/></td>
-                          <td><input type='number' id="bounceAmt" onChange={(e)=>handleChequeChange(e,item.chequeId,index)} disabled={item.isCleared ||!item.isBounced} value={item.bounceAmt} /></td>
+                          <td><input type='checkbox' id="isCleared" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isBounced} checked={item.isCleared} /></td>
+                          <td><input type='checkbox' id="isBounced" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isCleared} checked={item.isBounced} /></td>
+                          <td><input type='number' id="bounceAmt" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isCleared || !item.isBounced} value={item.bounceAmt} /></td>
                         </tr>
-                      )):null}
+                      )) : null}
                   </tbody>
                 </Table>
               </div>
-              
+
             </ModalBody>
             <ModalFooter>
               <Button onClick={toggleCheque}>Back</Button>
