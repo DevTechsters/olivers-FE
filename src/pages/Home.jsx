@@ -489,6 +489,8 @@ export default function Home() {
 
   const [savePayload, setSavePayload] = useState({})
 
+  const days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
       outline: 'none',
@@ -832,7 +834,7 @@ export default function Home() {
     },
     { field: 'updatedBy', headerName: 'Updated By', headerAlign: 'center', width: 100 },
     { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') } },
-    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130 },
+    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130,editable:true },
   ];
 
   const fetchBills = async () => {
@@ -1021,10 +1023,10 @@ export default function Home() {
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
-              <button className="bg-blue-500 text-white px-4 rounded" onClick={saveCall}>
+              <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" onClick={saveCall}>
                 <SaveIcon /> Save
               </button>
-              <button className="bg-blue-500 text-white px-4 rounded">
+              <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl">
                 <FileDownloadIcon /> Export
               </button>
             </div>
@@ -1150,6 +1152,7 @@ export default function Home() {
                     options={filterConst.salespersonNames.map((name)=>{
                       return {label:name,value:name}
                     })}
+                    isMulti
                     isSearchable
                    />
                 </Row>
@@ -1160,6 +1163,7 @@ export default function Home() {
                       return {label:name,value:name}
                     })}
                     isSearchable
+                    isMulti
                    />
                 </Row>
                 <Row>
@@ -1169,6 +1173,7 @@ export default function Home() {
                       return {label:name,value:name}
                     })}
                     isSearchable
+                    isMulti
                    />
                 </Row>
                 <Row>
@@ -1178,6 +1183,7 @@ export default function Home() {
                       return {label:name,value:name}
                     })}
                     isSearchable
+                    isMulti
                    />
                 </Row>
                 <Row>
@@ -1189,6 +1195,13 @@ export default function Home() {
                     <Label>To</Label>
                     <Input type='date' />
                   </Col>
+                </Row>
+                <Row>
+                  <Label>Day</Label>
+                  <Select
+                      options={days.map((item)=>({label:item,value:item}))}
+                      isMulti
+                  />
                 </Row>
               </div>
             </ModalBody>
