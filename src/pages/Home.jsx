@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useCallback } from 'react';
 import Header from '../components/Header';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
@@ -17,6 +17,7 @@ import { toast } from 'react-toastify';
 import _ from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
 import moment from 'moment';
+import { debounce } from 'lodash';
 
 
 
@@ -28,7 +29,10 @@ export default function Home() {
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); 
   const [rows, setRows] = useState([{
+    
     id: 0,
     invoiceId: 35,
     brand: "Mango Bite",
@@ -840,23 +844,20 @@ export default function Home() {
   const fetchBills = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
-      );
-      const billsData = response.data.Bills.map((bill, index) => ({
-        id: index,  // Assign an ID for each row
-        ...bill,
-      }));
+        const response = await axios.get(`http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`);
+        const billsData = response.data.Bills.map((bill) => ({
+            ...bill, // Keep all existing properties
+        }));
 
-
-
-      setRows(billsData);
-      setLoading(false);
+        setRows(billsData); // Set rows with the fetched data
+        setFilteredRows(billsData); // Initialize filteredRows with the fetched data
     } catch (error) {
-      console.error('Error fetching bills:', error);
-      setLoading(false);
+        console.error('Error fetching bills:', error);
+    } finally {
+        setLoading(false);
     }
-  };
+};
+
 
   const fetchFilterData=async()=>{
     setLoading(true);
@@ -870,12 +871,39 @@ export default function Home() {
     }
   }
 
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length === 4) {
+        try {
+          setLoading(true);
+          const response = await axios.get('/api/bill/search', {
+            params: { query },
+          });
+          setFilteredRows(response.data.Bills); // Assuming response.data.Bills contains the bills
+        } catch (error) {
+          console.error('Error searching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else if (query.length === 0) {
+        setFilteredRows(rows); // Reset to original rows when query is empty
+      }
+    }, 300), [rows]
+  );
+
+  
   useEffect(() => {
     fetchBills(); // Initial data fetch
     fetchFilterData()
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
 
+  const handleSearch = (event) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query); // Only call the debounced function
+};
 
+  
   const handleCelleditCommit = (newRow, oldRow) => {
     const updatedFields = {};
     Object.keys(newRow).forEach((field) => {
@@ -1019,7 +1047,14 @@ export default function Home() {
               </div>
               <div className="flex space-x-1 bg-white border rounded-lg border-gray-300">
                 <SearchIcon className="m-2" />
-                <input className="h-full focus:outline-none" type="text" placeholder="Search..." />
+                {/* Add search input and bind the search handler */}
+                <input
+                  className="h-full focus:outline-none"
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                />
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
@@ -1031,13 +1066,16 @@ export default function Home() {
               </button>
             </div>
           </div>
+  
+          {/* Render DataGrid with filteredRows */}
           <div className="m-4 bg-white">
             <Box sx={{ height: '77vh', width: '100%' }}>
               <DataGrid
-                rows={rows}
+                rows={filteredRows} // Use filtered rows here
                 columns={columns}
                 loading={loading}
-                rowCount={rows.length}
+                getRowId={(row) => row.invoiceId}
+                rowCount={filteredRows.length}
                 pageSizeOptions={[5, 10, 50]}
                 paginationModel={paginationModel}
                 paginationMode="server"
@@ -1051,7 +1089,7 @@ export default function Home() {
                   setRowSelectionModel(newRowSelectionModel);
                 }}
                 rowSelectionModel={rowSelectionModel}
-                editMode='cell'
+                editMode="cell"
                 getRowClassName={(params) => {
                   if (params.row.deliveryStatus === "Pending") {
                     return 'bg-lightRed';
