@@ -488,6 +488,8 @@ export default function Home() {
   })
 
   const [savePayload, setSavePayload] = useState({})
+  const [searchQuery,setSearchQuery]=useState("")
+  const [debounceTimeout,setDebounceTimeout]=useState(null)
 
   const days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -870,6 +872,41 @@ export default function Home() {
     }
   }
 
+  const fetchQuery=async()=>{
+    try {
+      setLoading(true);
+      const response = await axios.get('/api/bill/search', {
+        params: { searchQuery },
+      });
+      setRows(response.data.Bills.map((bill, index) => ({
+        id: index,  // Assign an ID for each row
+        ...bill,
+      }))); // Assuming response.data.Bills contains the bills
+    } catch (error) {
+      console.error('Error searching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(()=>{
+
+    if(debounceTimeout)
+    {
+      clearTimeout(debounceTimeout)
+    }
+
+    if(searchQuery.trim().length===4)
+    {
+      let timer=setTimeout(() => {
+        fetchQuery()
+      }, 5000);
+      setDebounceTimeout(timer)
+    }
+
+    return ()=>clearTimeout(debounceTimeout)
+  },[searchQuery])
+
   useEffect(() => {
     fetchBills(); // Initial data fetch
     fetchFilterData()
@@ -1003,6 +1040,8 @@ export default function Home() {
     }
   };
 
+
+
   return (
     <>
       {loading ? (
@@ -1019,7 +1058,7 @@ export default function Home() {
               </div>
               <div className="flex space-x-1 bg-white border rounded-lg border-gray-300">
                 <SearchIcon className="m-2" />
-                <input className="h-full focus:outline-none" type="text" placeholder="Search..." />
+                <input className="h-full focus:outline-none" maxLength={4} type="text" placeholder="Search..." onChange={(e)=>setSearchQuery(e.target.value)} />
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
