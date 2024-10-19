@@ -437,12 +437,12 @@ export default function Home() {
   const [paymentMethod, setPaymentMethod] = useState("")
   const [filterModal, setFilterModal] = useState(false)
   const [filterData, setFilterData] = useState({
-    SalesPerson: [],
-    BrandName: [],
-    RetailerName: [],
-    Beats: [],
-    Day: []
-  });
+    salespersonNames: [],
+    retailerNames: [],
+    beats: [],
+    brandNames: [],
+    days: [],
+});
   const [filterConst, setFiterConst] = useState({
     salespersonNames: [
       "Mohan",
@@ -606,13 +606,11 @@ export default function Home() {
 
   const toggleFilter = () => {
     setFilterModal(!filterModal)
-    setFilterData({
-      SalesPerson: [],
-      BrandName: [],
-      RetailerName: [],
-      Beats: [],
-      Day: []
-    })
+    setFilterData({salespersonNames: [],
+      retailerNames: [],
+      beats: [],
+      brandNames: [],
+      days: [],})
   }
 
   const toggleCheque = () => {
@@ -851,7 +849,7 @@ export default function Home() {
   const fetchBills = async () => {
     setLoading(true);
     let payload={
-      ...filterData,...{Page:paginationModel.page,Size:paginationModel.pageSize}
+      ...filterData,...{page:paginationModel.page,size:paginationModel.pageSize}
     }
     console.log(payload,"payload");
     
@@ -1216,7 +1214,7 @@ export default function Home() {
                     })}
                     isMulti
                     isSearchable
-                    name="SalesPerson"
+                    name="salespersonNames"
                     onChange={handleFilterSelectChange}
                    />
                 </Row>
@@ -1229,7 +1227,7 @@ export default function Home() {
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
-                    name="RetailerName"
+                    name="retailerNames"
                    />
                 </Row>
                 <Row>
@@ -1241,7 +1239,7 @@ export default function Home() {
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
-                    name='Beats'
+                    name='beats'
                    />
                 </Row>
                 <Row>
@@ -1253,7 +1251,7 @@ export default function Home() {
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
-                    name="BrandName"
+                    name="brandNames"
                    />
                 </Row>
                 <Row>
@@ -1262,7 +1260,7 @@ export default function Home() {
                       options={days.map((item)=>({label:item,value:item}))}
                       isMulti
                       onChange={handleFilterSelectChange}
-                      name='Day'
+                      name='days'
                   />
                 </Row>
               </div>
