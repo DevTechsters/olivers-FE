@@ -437,9 +437,11 @@ export default function Home() {
   const [paymentMethod, setPaymentMethod] = useState("")
   const [filterModal, setFilterModal] = useState(false)
   const [filterData, setFilterData] = useState({
-    option1: null,
-    option2: null,
-    option3: null,
+    SalesPerson: [],
+    BrandName: [],
+    RetailerName: [],
+    Beats: [],
+    Day: []
   });
   const [filterConst, setFiterConst] = useState({
     salespersonNames: [
@@ -604,6 +606,13 @@ export default function Home() {
 
   const toggleFilter = () => {
     setFilterModal(!filterModal)
+    setFilterData({
+      SalesPerson: [],
+      BrandName: [],
+      RetailerName: [],
+      Beats: [],
+      Day: []
+    })
   }
 
   const toggleCheque = () => {
@@ -841,9 +850,15 @@ export default function Home() {
 
   const fetchBills = async () => {
     setLoading(true);
+    let payload={
+      ...filterData,...{Page:paginationModel.page,Size:paginationModel.pageSize}
+    }
+    console.log(payload,"payload");
+    
     try {
-      const response = await axios.get(
-        `http://localhost:8081/api/bill?page=${paginationModel.page + 1}&size=${paginationModel.pageSize}`
+      const response = await axios.post(
+        `http://localhost:8081/api/bill`,
+        payload
       );
       const billsData = response.data.Bills.map((bill, index) => ({
         id: index,  // Assign an ID for each row
@@ -900,7 +915,7 @@ export default function Home() {
     {
       let timer=setTimeout(() => {
         fetchQuery()
-      }, 5000);
+      }, 1000);
       setDebounceTimeout(timer)
     }
 
@@ -1040,7 +1055,15 @@ export default function Home() {
     }
   };
 
+  const handleFilterSelectChange = (selectedOptions, { name }) => {
+    setFilterData((prevState) => ({
+      ...prevState,
+      [name]: selectedOptions ? selectedOptions.map((option) => option.value) : [], // Store the selected options as an array
+    }));
+  };
 
+  console.log(filterData,"Filter");
+  
 
   return (
     <>
@@ -1193,6 +1216,8 @@ export default function Home() {
                     })}
                     isMulti
                     isSearchable
+                    name="SalesPerson"
+                    onChange={handleFilterSelectChange}
                    />
                 </Row>
                 <Row>
@@ -1203,6 +1228,8 @@ export default function Home() {
                     })}
                     isSearchable
                     isMulti
+                    onChange={handleFilterSelectChange}
+                    name="RetailerName"
                    />
                 </Row>
                 <Row>
@@ -1213,6 +1240,8 @@ export default function Home() {
                     })}
                     isSearchable
                     isMulti
+                    onChange={handleFilterSelectChange}
+                    name='Beats'
                    />
                 </Row>
                 <Row>
@@ -1223,29 +1252,23 @@ export default function Home() {
                     })}
                     isSearchable
                     isMulti
+                    onChange={handleFilterSelectChange}
+                    name="BrandName"
                    />
-                </Row>
-                <Row>
-                  <Col>
-                    <Label>From</Label>
-                    <Input type='date' />
-                  </Col>
-                  <Col>
-                    <Label>To</Label>
-                    <Input type='date' />
-                  </Col>
                 </Row>
                 <Row>
                   <Label>Day</Label>
                   <Select
                       options={days.map((item)=>({label:item,value:item}))}
                       isMulti
+                      onChange={handleFilterSelectChange}
+                      name='Day'
                   />
                 </Row>
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button color="primary">Filter</Button>
+              <Button color="primary" onClick={()=> {fetchBills(); toggleFilter();}}>Filter</Button>
               <Button onClick={toggleFilter}>Cancel</Button>
             </ModalFooter>
           </Modal>
