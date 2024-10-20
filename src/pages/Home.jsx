@@ -1054,6 +1054,27 @@ export default function Home() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    if (value.trim().length === 0) {
+      fetchBills(); // Return to main records when search is cleared
+      return;
+    }
+
+    if (value.trim().length === 4) {
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+
+      const timer = setTimeout(() => {
+        fetchQuery();
+      }, 1000);
+      setDebounceTimeout(timer);
+    }
+  };
+
   const handleFilterSelectChange = (selectedOptions, { name }) => {
     setFilterData((prevState) => ({
       ...prevState,
@@ -1080,7 +1101,14 @@ export default function Home() {
               </div>
               <div className="flex space-x-1 bg-white border rounded-lg border-gray-300">
                 <SearchIcon className="m-2" />
-                <input className="h-full focus:outline-none" maxLength={4} type="text" placeholder="Search..." onChange={(e)=>setSearchQuery(e.target.value)} />
+                <input 
+  className="h-full focus:outline-none" 
+  maxLength={4} 
+  type="text" 
+  placeholder="Search..." 
+  value={searchQuery}  // Added this line
+  onChange={handleSearchChange}
+/>
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
