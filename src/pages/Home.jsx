@@ -885,23 +885,24 @@ export default function Home() {
     }
   }
 
-  const fetchQuery=async()=>{
+  const fetchQuery = async () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/bill/search', {
-        params: { searchQuery },
+        params: { query: searchQuery },  // Corrected 'query' instead of 'searchQuery'
       });
+      
       setRows(response.data.Bills.map((bill, index) => ({
         id: index,  // Assign an ID for each row
         ...bill,
-      }))); // Assuming response.data.Bills contains the bills
+      })));
     } catch (error) {
       console.error('Error searching data:', error);
     } finally {
       setLoading(false);
     }
-  }
-
+  };
+  
   useEffect(()=>{
 
     if(debounceTimeout)
