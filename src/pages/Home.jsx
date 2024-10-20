@@ -28,7 +28,7 @@ import moment from 'moment';
 
 export default function Home() {
   const [paginationModel, setPaginationModel] = useState({
-    page: 0,
+    page: 1,
     pageSize: 5,  // Changed this to 5 to match API request size
   });
   const [openDialog, setOpenDialog] = useState(false);
@@ -713,6 +713,7 @@ export default function Home() {
       });
       toast.success("Deleted sucessfully")
       fetchBills();
+      setRowSelectionModel([]);
 
     } catch (error) {
       console.error('Error deleting bill:', error);
@@ -809,8 +810,9 @@ export default function Home() {
     try {
       await axios.post(`/api/bill/edit/${editData.invoiceId}`, editPayload)
       toast.info("Saved successfully")
-      await fetchBills(); // Fetch the updated data directly
+      fetchBills(); // Fetch the updated data directly
       toggle();
+            
     }
     catch (error) {
       toast.error(error.response)
@@ -931,7 +933,7 @@ export default function Home() {
     { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130, editable: true },
   ];
 
-
+const [totalrows,settotalrows]=useState(0) 
   const fetchBills = async () => {
     setLoading(true);
     let payload = {
@@ -944,6 +946,7 @@ export default function Home() {
         `http://localhost:8081/api/bill`,
         payload
       );
+      settotalrows(response.data.pagination.totalItems)
       const billsData = response.data.Bills.map((bill, index) => ({
         id: index,  // Assign an ID for each row
         ...bill,
@@ -1053,6 +1056,7 @@ export default function Home() {
     axios.post("http://localhost:8081/api/bill/update", payload).then(() => {
       toast.info("Saved successfully")
       fetchBills()
+      setRowSelectionModel([]);
     }).catch((error) => {
       toast.error("Something went wrong while saving")
       setLoading(false)
@@ -1217,7 +1221,7 @@ export default function Home() {
                 rows={rows}
                 columns={columns}
                 loading={loading}
-                rowCount={rows.length}
+                rowCount={totalrows}
                 pageSizeOptions={[5, 10, 50]}
                 paginationModel={paginationModel}
                 paginationMode="server"
