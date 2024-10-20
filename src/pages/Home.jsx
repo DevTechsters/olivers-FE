@@ -20,7 +20,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, But
 import axios from 'axios';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
-import _ from 'lodash';
+import _, { iteratee } from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
 import moment from 'moment';
 
@@ -32,27 +32,48 @@ export default function Home() {
     pageSize: 5,  // Changed this to 5 to match API request size
   });
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState(null);
-  const [billNumber, setBillNumber] = useState(null); 
+  const [selectedRowId, setSelectedRowId] = useState({
+    id: null,
+    billNo: null
+  });
+  const [deleteAll,setDeleteAll]=useState(false)
+
 
   const handleDialogOpen = (id) => {
+    if(deleteAll)
+    {
+      setOpenDialog(true)
+    }
+    else
+    {
     const rowToDelete = rows.find(row => row.id === id); // Get the row data
     if (rowToDelete) {
-      setSelectedRowId(id);
-      setBillNumber(rowToDelete.billno); // Get the bill number
+      setSelectedRowId({
+        id,
+        billNo: rowToDelete.billno
+      });
       setOpenDialog(true); // Open the dialog
+    }
     }
   };
 
   const handleDialogClose = () => {
     setOpenDialog(false); // Close the dialog without any action
   };
-  
+
   const handleDialogConfirm = () => {
-    handleDeleteClick(selectedRowId); // Trigger the delete action for the selected row
-    setOpenDialog(false); // Close the dialog after confirmation
+    if(deleteAll)
+    {
+      deletecall()
+      setOpenDialog(false)
+    }
+    else
+    {
+      handleDeleteClick(selectedRowId.id); // Trigger the delete action for the selected row
+      setOpenDialog(false); // Close the dialog after confirmation
+    }
   };
-  
+
 
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
@@ -471,7 +492,7 @@ export default function Home() {
     beats: [],
     brandNames: [],
     days: [],
-});
+  });
   const [filterConst, setFiterConst] = useState({
     salespersonNames: [
       "Mohan",
@@ -519,10 +540,10 @@ export default function Home() {
   })
 
   const [savePayload, setSavePayload] = useState({})
-  const [searchQuery,setSearchQuery]=useState("")
-  const [debounceTimeout,setDebounceTimeout]=useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [debounceTimeout, setDebounceTimeout] = useState(null)
 
-  const days=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
   const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
@@ -635,11 +656,13 @@ export default function Home() {
 
   const toggleFilter = () => {
     setFilterModal(!filterModal)
-    setFilterData({salespersonNames: [],
+    setFilterData({
+      salespersonNames: [],
       retailerNames: [],
       beats: [],
       brandNames: [],
-      days: [],})
+      days: [],
+    })
   }
 
   const toggleCheque = () => {
@@ -685,63 +708,39 @@ export default function Home() {
   };
   const deleteBillApi = async (invoiceId) => {
     try {
-      const response = await axios.delete(`/api/bill/delete/${invoiceId}`);
+      const response = await axios.delete("/api/bill/delete", {
+        data: { invoiceIds: invoiceId } 
+      });
+      toast.success("Deleted sucessfully")
       fetchBills();
-      return response.data; // Return response data if needed
-      
+
     } catch (error) {
       console.error('Error deleting bill:', error);
-      throw error; // Propagate error for handling in the caller
+      toast.error('Error deleting bill')
     }
   };
 
-  // const handleDeleteClick = (id) => {
-  //   const rowToDelete = rows.find(row => row.id === id);
-  
-  //   if (rowSelectionModel.includes(id) && rowToDelete) {
-  //     const invoiceId = rowToDelete.invoiceId;
-  
-  //     deleteBillApi(invoiceId)
-  //       .then(response => {
-  //         console.log('Bill deleted successfully:', response);
-  //       })
-  //       .catch(error => {
-  //         console.error('Failed to delete bill:', error);
-  //       });
-  //   } else {
-  //     console.error("Row is not selected or not found for id:", id);
-  //   }
-  // };
-  
-  
+
+
   const handleDeleteClick = (id) => {
     // Find the row that corresponds to the clicked delete icon
     const rowToDelete = rows.find(row => row.id === id);
-  
+
     // Proceed only if the row is part of the selected rows
-    if (rowSelectionModel.includes(id) && rowToDelete) {
-      const invoiceId = rowToDelete.invoiceId; // Retrieve billno or invoiceId from the found row
-  
+    if (rowToDelete) {
+      const invoiceId = [rowToDelete.invoiceId]; // Retrieve billno or invoiceId from the found row
+
       // Log the retrieved billno
       console.log('Deleting invoiceId for specific row:', invoiceId);
-  
+
       // Call the API to delete the bill
       deleteBillApi(invoiceId)
-        .then(response => {
-          // Handle success, e.g., show a success message or refresh data
-          console.log('Bill deleted successfully:', response);
-          // Optionally refresh or update the data here
-        })
-        .catch(error => {
-          // Handle error
-          console.error('Failed to delete bill:', error);
-        });
     } else {
       console.error("Row is not selected or not found for id:", id);
     }
   };
-  
-  
+
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -844,7 +843,7 @@ export default function Home() {
           color="inherit"
         />,
       ],
-      
+
     },
     { field: 'brand', headerName: 'Brand', headerAlign: 'center', width: 120 },
     { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center', width: 150 },
@@ -929,17 +928,17 @@ export default function Home() {
     },
     { field: 'updatedBy', headerName: 'Updated By', headerAlign: 'center', width: 100 },
     { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') } },
-    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130,editable:true },
+    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130, editable: true },
   ];
-  
+
 
   const fetchBills = async () => {
     setLoading(true);
-    let payload={
-      ...filterData,...{page:paginationModel.page,size:paginationModel.pageSize}
+    let payload = {
+      ...filterData, ...{ page: paginationModel.page, size: paginationModel.pageSize }
     }
-    console.log(payload,"payload");
-    
+    console.log(payload, "payload");
+
     try {
       const response = await axios.post(
         `http://localhost:8081/api/bill`,
@@ -960,7 +959,7 @@ export default function Home() {
     }
   };
 
-  const fetchFilterData=async()=>{
+  const fetchFilterData = async () => {
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:8081/api/bill/filter")
@@ -978,7 +977,7 @@ export default function Home() {
       const response = await axios.get('/api/bill/search', {
         params: { query: searchQuery },  // Corrected 'query' instead of 'searchQuery'
       });
-      
+
       setRows(response.data.Bills.map((bill, index) => ({
         id: index,  // Assign an ID for each row
         ...bill,
@@ -989,28 +988,26 @@ export default function Home() {
       setLoading(false);
     }
   };
-  
-  useEffect(()=>{
 
-    if(debounceTimeout)
-    {
+  useEffect(() => {
+
+    if (debounceTimeout) {
       clearTimeout(debounceTimeout)
     }
 
-    if(searchQuery.trim().length===4)
-    {
-      let timer=setTimeout(() => {
+    if (searchQuery.trim().length === 4) {
+      let timer = setTimeout(() => {
         fetchQuery()
       }, 1000);
       setDebounceTimeout(timer)
     }
 
-    return ()=>clearTimeout(debounceTimeout)
-  },[searchQuery])
+    return () => clearTimeout(debounceTimeout)
+  }, [searchQuery])
 
   useEffect(() => {
     fetchFilterData()
-  },[]);
+  }, []);
 
   useEffect(() => {
     fetchBills(); // Initial data fetch
@@ -1147,7 +1144,7 @@ export default function Home() {
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
-    
+
     if (value.trim().length === 0) {
       fetchBills(); // Return to main records when search is cleared
       return;
@@ -1161,34 +1158,21 @@ export default function Home() {
     }));
   };
 
-  console.log(filterData,"Filter");
+  const deletecall =()=>{
+    let payload=rowSelectionModel.map((item)=>rows[item].invoiceId)
+    deleteBillApi(payload)
+    setDeleteAll(false)
+  }
+
+  console.log(filterData, "Filter");
+  console.log(rowSelectionModel,"rwoselec");
   
+
 
   return (
 
-    
+
     <>
-    <Dialog
-        open={openDialog}    // Controls whether the dialog is open or closed
-        onClose={handleDialogClose}  // Close the dialog when clicking outside or pressing Escape
-      >
-        <DialogTitle>Confirm Deletion</DialogTitle>   {/* Dialog title */}
-        
-        <DialogContent>   {/* Main content of the dialog */}
-          <DialogContentText>
-          Are you sure you want to delete Bill {billNumber}?
-          </DialogContentText>
-        </DialogContent>
-        
-        <DialogActions>   {/* Action buttons at the bottom of the dialog */}
-          <MyButton onClick={handleDialogClose} color="primary">
-            Cancel
-          </MyButton>
-          <MyButton onClick={handleDialogConfirm} color="primary">
-            Delete
-          </MyButton>
-        </DialogActions>
-      </Dialog>
       {loading ? (
         <Loader />
       ) : (
@@ -1203,17 +1187,22 @@ export default function Home() {
               </div>
               <div className="flex space-x-1 bg-white border rounded-lg border-gray-300">
                 <SearchIcon className="m-2" />
-                <input 
-  className="h-full focus:outline-none" 
-  maxLength={4} 
-  type="text" 
-  placeholder="Search..." 
-  value={searchQuery}  // Added this line
-  onChange={handleSearchChange}
-/>
+                <input
+                  className="h-full focus:outline-none"
+                  maxLength={4}
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}  // Added this line
+                  onChange={handleSearchChange}
+                />
               </div>
             </div>
             <div className="flex space-x-2 mx-6">
+              {rowSelectionModel.length?
+                <button className="bg-red-500 text-white px-4 rounded hover:shadow-xl" onClick={()=>{setDeleteAll(true); setOpenDialog(true);}}>
+                <DeleteIcon/> Delete
+                </button>:null
+              }
               <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" onClick={saveCall}>
                 <SaveIcon /> Save
               </button>
@@ -1340,64 +1329,64 @@ export default function Home() {
                 <Row>
                   <Label>Salesperson Name</Label>
                   <Select
-                    options={filterConst.salespersonNames.map((name)=>{
-                      return {label:name,value:name}
+                    options={filterConst.salespersonNames.map((name) => {
+                      return { label: name, value: name }
                     })}
                     isMulti
                     isSearchable
                     name="salespersonNames"
                     onChange={handleFilterSelectChange}
-                   />
+                  />
                 </Row>
                 <Row>
                   <Label>Retailer Name</Label>
                   <Select
-                    options={filterConst.retailerNames.map((name)=>{
-                      return {label:name,value:name}
+                    options={filterConst.retailerNames.map((name) => {
+                      return { label: name, value: name }
                     })}
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
                     name="retailerNames"
-                   />
+                  />
                 </Row>
                 <Row>
                   <Label>Beats</Label>
                   <Select
-                    options={filterConst.beats.map((name)=>{
-                      return {label:name,value:name}
+                    options={filterConst.beats.map((name) => {
+                      return { label: name, value: name }
                     })}
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
                     name='beats'
-                   />
+                  />
                 </Row>
                 <Row>
                   <Label>Brand name</Label>
                   <Select
-                    options={filterConst.brandNames.map((name)=>{
-                      return {label:name,value:name}
+                    options={filterConst.brandNames.map((name) => {
+                      return { label: name, value: name }
                     })}
                     isSearchable
                     isMulti
                     onChange={handleFilterSelectChange}
                     name="brandNames"
-                   />
+                  />
                 </Row>
                 <Row>
                   <Label>Day</Label>
                   <Select
-                      options={days.map((item)=>({label:item,value:item}))}
-                      isMulti
-                      onChange={handleFilterSelectChange}
-                      name='days'
+                    options={days.map((item) => ({ label: item, value: item }))}
+                    isMulti
+                    onChange={handleFilterSelectChange}
+                    name='days'
                   />
                 </Row>
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button color="primary" onClick={()=> {fetchBills(); toggleFilter();}}>Filter</Button>
+              <Button color="primary" onClick={() => { fetchBills(); toggleFilter(); }}>Filter</Button>
               <Button onClick={toggleFilter}>Cancel</Button>
             </ModalFooter>
           </Modal>
@@ -1465,6 +1454,27 @@ export default function Home() {
               <Button onClick={toggleCheque}>Back</Button>
             </ModalFooter>
           </Modal>
+          <Dialog
+        open={openDialog}    // Controls whether the dialog is open or closed
+        onClose={handleDialogClose}  // Close the dialog when clicking outside or pressing Escape
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>   {/* Dialog title */}
+
+        <DialogContent>   {/* Main content of the dialog */}
+          <DialogContentText>
+           Are you sure you want to delete the { deleteAll ? "selected bills" :selectedRowId.billNo }?
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>   {/* Action buttons at the bottom of the dialog */}
+          <MyButton onClick={handleDialogClose} color="primary">
+            Cancel
+          </MyButton>
+          <MyButton onClick={handleDialogConfirm} color="primary">
+            Delete
+          </MyButton>
+        </DialogActions>
+      </Dialog>
 
 
 
