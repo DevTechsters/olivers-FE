@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import MyButton from '@mui/material/Button';
 import Header from '../components/Header';
 import SearchIcon from '@mui/icons-material/Search';
 import IconButton from '@mui/material/IconButton';
@@ -25,6 +31,29 @@ export default function Home() {
     page: 0,
     pageSize: 5,  // Changed this to 5 to match API request size
   });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [billNumber, setBillNumber] = useState(null); 
+
+  const handleDialogOpen = (id) => {
+    const rowToDelete = rows.find(row => row.id === id); // Get the row data
+    if (rowToDelete) {
+      setSelectedRowId(id);
+      setBillNumber(rowToDelete.billno); // Get the bill number
+      setOpenDialog(true); // Open the dialog
+    }
+  };
+
+  const handleDialogClose = () => {
+    setOpenDialog(false); // Close the dialog without any action
+  };
+  
+  const handleDialogConfirm = () => {
+    handleDeleteClick(selectedRowId); // Trigger the delete action for the selected row
+    setOpenDialog(false); // Close the dialog after confirmation
+  };
+  
+
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
@@ -654,10 +683,65 @@ export default function Home() {
     setEditdata(rows[id]);
     setBillsHistory(rows[id].billsHistory);
   };
-
-  const handleDeleteClick = (id) => () => {
-
+  const deleteBillApi = async (invoiceId) => {
+    try {
+      const response = await axios.delete(`/api/bill/delete/${invoiceId}`);
+      fetchBills();
+      return response.data; // Return response data if needed
+      
+    } catch (error) {
+      console.error('Error deleting bill:', error);
+      throw error; // Propagate error for handling in the caller
+    }
   };
+
+  // const handleDeleteClick = (id) => {
+  //   const rowToDelete = rows.find(row => row.id === id);
+  
+  //   if (rowSelectionModel.includes(id) && rowToDelete) {
+  //     const invoiceId = rowToDelete.invoiceId;
+  
+  //     deleteBillApi(invoiceId)
+  //       .then(response => {
+  //         console.log('Bill deleted successfully:', response);
+  //       })
+  //       .catch(error => {
+  //         console.error('Failed to delete bill:', error);
+  //       });
+  //   } else {
+  //     console.error("Row is not selected or not found for id:", id);
+  //   }
+  // };
+  
+  
+  const handleDeleteClick = (id) => {
+    // Find the row that corresponds to the clicked delete icon
+    const rowToDelete = rows.find(row => row.id === id);
+  
+    // Proceed only if the row is part of the selected rows
+    if (rowSelectionModel.includes(id) && rowToDelete) {
+      const invoiceId = rowToDelete.invoiceId; // Retrieve billno or invoiceId from the found row
+  
+      // Log the retrieved billno
+      console.log('Deleting invoiceId for specific row:', invoiceId);
+  
+      // Call the API to delete the bill
+      deleteBillApi(invoiceId)
+        .then(response => {
+          // Handle success, e.g., show a success message or refresh data
+          console.log('Bill deleted successfully:', response);
+          // Optionally refresh or update the data here
+        })
+        .catch(error => {
+          // Handle error
+          console.error('Failed to delete bill:', error);
+        });
+    } else {
+      console.error("Row is not selected or not found for id:", id);
+    }
+  };
+  
+  
 
   const validateForm = () => {
     const newErrors = {};
@@ -755,10 +839,12 @@ export default function Home() {
         <GridActionsCellItem
           icon={<DeleteIcon />}
           label="Delete"
-          onClick={handleDeleteClick(id)}
+          onClick={() => handleDialogOpen(id)}  // Open the dialog on delete click
+          //onClick={() => handleDeleteClick(id)}
           color="inherit"
         />,
       ],
+      
     },
     { field: 'brand', headerName: 'Brand', headerAlign: 'center', width: 120 },
     { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center', width: 150 },
@@ -845,6 +931,7 @@ export default function Home() {
     { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') } },
     { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130,editable:true },
   ];
+  
 
   const fetchBills = async () => {
     setLoading(true);
@@ -922,8 +1009,11 @@ export default function Home() {
   },[searchQuery])
 
   useEffect(() => {
-    fetchBills(); // Initial data fetch
     fetchFilterData()
+  },[]);
+
+  useEffect(() => {
+    fetchBills(); // Initial data fetch
   }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
 
 
@@ -1062,17 +1152,6 @@ export default function Home() {
       fetchBills(); // Return to main records when search is cleared
       return;
     }
-
-    if (value.trim().length === 4) {
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-      }
-
-      const timer = setTimeout(() => {
-        fetchQuery();
-      }, 1000);
-      setDebounceTimeout(timer);
-    }
   };
 
   const handleFilterSelectChange = (selectedOptions, { name }) => {
@@ -1086,7 +1165,30 @@ export default function Home() {
   
 
   return (
+
+    
     <>
+    <Dialog
+        open={openDialog}    // Controls whether the dialog is open or closed
+        onClose={handleDialogClose}  // Close the dialog when clicking outside or pressing Escape
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>   {/* Dialog title */}
+        
+        <DialogContent>   {/* Main content of the dialog */}
+          <DialogContentText>
+          Are you sure you want to delete Bill {billNumber}?
+          </DialogContentText>
+        </DialogContent>
+        
+        <DialogActions>   {/* Action buttons at the bottom of the dialog */}
+          <MyButton onClick={handleDialogClose} color="primary">
+            Cancel
+          </MyButton>
+          <MyButton onClick={handleDialogConfirm} color="primary">
+            Delete
+          </MyButton>
+        </DialogActions>
+      </Dialog>
       {loading ? (
         <Loader />
       ) : (
