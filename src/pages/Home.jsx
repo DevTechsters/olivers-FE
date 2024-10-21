@@ -1171,6 +1171,16 @@ const [totalrows,settotalrows]=useState(0)
   console.log(filterData, "Filter");
   console.log(rowSelectionModel,"rwoselec");
   
+  const clearFilter=()=>{
+    setFilterData({
+      salespersonNames: [],
+      retailerNames: [],
+      beats: [],
+      brandNames: [],
+      days: [],
+    })
+    fetchBills()
+  }
 
 
   return (
@@ -1406,6 +1416,7 @@ const [totalrows,settotalrows]=useState(0)
             </ModalBody>
             <ModalFooter>
               <Button color="primary" onClick={() => { fetchBills(); toggleFilter(); }}>Filter</Button>
+              <Button onClick={clearFilter}>Clear</Button>
               <Button onClick={toggleFilter}>Cancel</Button>
             </ModalFooter>
           </Modal>
