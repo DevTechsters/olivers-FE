@@ -656,13 +656,13 @@ export default function Home() {
 
   const toggleFilter = () => {
     setFilterModal(!filterModal)
-    setFilterData({
-      salespersonNames: [],
-      retailerNames: [],
-      beats: [],
-      brandNames: [],
-      days: [],
-    })
+    // setFilterData({
+    //   salespersonNames: [],
+    //   retailerNames: [],
+    //   beats: [],
+    //   brandNames: [],
+    //   days: [],
+    // })
   }
 
   const toggleCheque = () => {
@@ -1336,6 +1336,9 @@ export default function Home() {
                     isSearchable
                     name="salespersonNames"
                     onChange={handleFilterSelectChange}
+                    value={filterData.salespersonNames.map((name) => {
+                      return { label: name, value: name }
+                    })}
                   />
                 </Row>
                 <Row>
@@ -1348,6 +1351,9 @@ export default function Home() {
                     isMulti
                     onChange={handleFilterSelectChange}
                     name="retailerNames"
+                    value={filterData.retailerNames.map((name) => {
+                      return { label: name, value: name }
+                    })}
                   />
                 </Row>
                 <Row>
@@ -1360,6 +1366,9 @@ export default function Home() {
                     isMulti
                     onChange={handleFilterSelectChange}
                     name='beats'
+                    value={filterData.beats.map((name) => {
+                      return { label: name, value: name }
+                    })}
                   />
                 </Row>
                 <Row>
@@ -1372,6 +1381,9 @@ export default function Home() {
                     isMulti
                     onChange={handleFilterSelectChange}
                     name="brandNames"
+                    value={filterData.brandNames.map((name) => {
+                      return { label: name, value: name }
+                    })}
                   />
                 </Row>
                 <Row>
@@ -1381,6 +1393,9 @@ export default function Home() {
                     isMulti
                     onChange={handleFilterSelectChange}
                     name='days'
+                    value={filterData.days.map((name) => {
+                      return { label: name, value: name }
+                    })}
                   />
                 </Row>
               </div>
