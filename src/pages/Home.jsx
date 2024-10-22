@@ -934,12 +934,31 @@ export default function Home() {
   ];
 
 const [totalrows,settotalrows]=useState(0) 
-  const fetchBills = async () => {
+  const fetchBills = async (checkfilter) => {
     setLoading(true);
-    let payload = {
-      ...filterData, ...{ page: paginationModel.page, size: paginationModel.pageSize }
+    let payload;
+    if(checkfilter)
+    {
+      payload = {
+        ...{
+          salespersonNames: [],
+          retailerNames: [],
+          beats: [],
+          brandNames: [],
+          days: [],
+        }, ...{ page: paginationModel.page, size: paginationModel.pageSize }
+      }
+      console.log(payload, "payload");
+      
     }
-    console.log(payload, "payload");
+    else{
+      payload = {
+        ...filterData, ...{ page: paginationModel.page, size: paginationModel.pageSize }
+      }
+      console.log(payload, "payload");
+
+    }
+   
 
     try {
       const response = await axios.post(
@@ -1179,7 +1198,8 @@ const [totalrows,settotalrows]=useState(0)
       brandNames: [],
       days: [],
     })
-    fetchBills()
+    fetchBills(true)
+    toggleFilter()
   }
 
 
