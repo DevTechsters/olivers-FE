@@ -15,7 +15,7 @@ const SignupPage = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('/api/users/signup', {
+      const response = await axios.post('http://localhost:8081/api/users/signup', {
         username,
         password,
         passkey,

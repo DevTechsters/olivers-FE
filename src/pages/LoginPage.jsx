@@ -15,7 +15,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/users/signin', {
+      const response = await axios.post('http://localhost:8081/api/users/signin', {
         username,
         password,
       });

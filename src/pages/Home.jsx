@@ -708,7 +708,7 @@ export default function Home() {
   };
   const deleteBillApi = async (invoiceId) => {
     try {
-      const response = await axios.delete("/api/bill/delete", {
+      const response = await axios.delete("http://localhost:8081/api/bill/delete", {
         data: { invoiceIds: invoiceId } 
       });
       toast.success("Deleted sucessfully")
@@ -808,7 +808,7 @@ export default function Home() {
     console.log(editPayload);
 
     try {
-      await axios.post(`/api/bill/edit/${editData.invoiceId}`, editPayload)
+      await axios.post(`http://localhost:8081/api/bill/edit/${editData.invoiceId}`, editPayload)
       toast.info("Saved successfully")
       fetchBills(); // Fetch the updated data directly
       toggle();
@@ -996,7 +996,7 @@ const [totalrows,settotalrows]=useState(0)
   const fetchQuery = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/bill/search', {
+      const response = await axios.get('http://localhost:8081/api/bill/search', {
         params: { query: searchQuery },  // Corrected 'query' instead of 'searchQuery'
       });
 
