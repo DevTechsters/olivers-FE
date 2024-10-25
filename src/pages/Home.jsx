@@ -1075,6 +1075,7 @@ const [totalrows,settotalrows]=useState(0)
     axios.post("http://localhost:8081/api/bill/update", payload).then(() => {
       toast.info("Saved successfully")
       fetchBills()
+      setSavePayload({})
       setRowSelectionModel([]);
     }).catch((error) => {
       toast.error("Something went wrong while saving")
