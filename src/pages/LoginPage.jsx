@@ -15,28 +15,34 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8081/api/users/signin', {
-        username,
-        password,
-      });
+        const response = await axios.post('http://localhost:8081/api/users/signin', {
+            username,
+            password,
+        }, {
+            withCredentials: true  // Important: this allows cookies to be sent
+        });
 
-      // Successful login
-      dispatch(login({ username }));
-      toast.info("Logged in sucessfully")
-      navigate("/home");
+        // Store in localStorage or state management
+        localStorage.setItem('username', response.data.username);
+        
+        // Update Redux state
+        dispatch(login({ username: response.data.username }));
+        
+        toast.info("Logged in successfully");
+        navigate("/home");
     } catch (error) {
-      if (error.response) {
-        // Server responded with a status other than 2xx
-        setErrorMessage(error.response.data || 'Login failed');
-      } else if (error.request) {
-        // Request was made but no response received
-        setErrorMessage('No response received');
-      } else {
-        // Something happened in setting up the request
-        setErrorMessage('Error setting up the request');
-      }
+        if (error.response) {
+            const { message, status, path } = error.response.data || {};
+            setErrorMessage(`${message || 'Error'} (Status: ${status || 'Unknown'} at ${path || 'Unknown path'})`);
+        } else if (error.request) {
+            setErrorMessage('No response received');
+        } else {
+            setErrorMessage('Error setting up the request');
+        }
     }
-  };
+};
+  
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

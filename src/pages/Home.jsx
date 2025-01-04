@@ -23,10 +23,21 @@ import { toast } from 'react-toastify';
 import _, { iteratee } from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
 import moment from 'moment';
+import ExportModal from './Export';
+
+
+
+
 
 
 
 export default function Home() {
+
+  const [exportModal, setExportModal] = useState(false);
+
+  // Function to toggle the modal
+
+
   const [paginationModel, setPaginationModel] = useState({
     page: 1,
     pageSize: 5,  // Changed this to 5 to match API request size
@@ -37,6 +48,10 @@ export default function Home() {
     billNo: null
   });
   const [deleteAll,setDeleteAll]=useState(false)
+
+  const toggleExport = () => {
+    setExportModal(!exportModal);
+  };
 
 
   const handleDialogOpen = (id) => {
@@ -73,6 +88,8 @@ export default function Home() {
       setOpenDialog(false); // Close the dialog after confirmation
     }
   };
+
+
 
 
   const [editData, setEditdata] = useState({});
@@ -1241,9 +1258,15 @@ const [totalrows,settotalrows]=useState(0)
               <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" onClick={saveCall}>
                 <SaveIcon /> Save
               </button>
-              <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl">
-                <FileDownloadIcon /> Export
-              </button>
+              <button 
+  className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" 
+  onClick={toggleExport}
+>
+  <FileDownloadIcon /> Export
+</button>
+
+<ExportModal isOpen={exportModal} toggle={toggleExport} />
+
             </div>
           </div>
           <div className="m-4 bg-white">
