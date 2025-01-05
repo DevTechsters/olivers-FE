@@ -328,7 +328,8 @@ export default function Home() {
   const deleteBillApi = async (invoiceId) => {
     try {
       const response = await axios.delete("http://localhost:8081/api/bill/delete", {
-        data: { invoiceIds: invoiceId } 
+        data: { invoiceIds: invoiceId },
+        withCredentials: true, 
       });
       toast.success("Deleted sucessfully")
       fetchBills();
@@ -679,7 +680,7 @@ const [totalrows,settotalrows]=useState(0)
     return newRow;
   }
 
-  const saveCall = () => {
+  const saveCall = async() => {
     setLoading(true)
     const payload = []
     rowSelectionModel.map((id) => {
@@ -691,16 +692,41 @@ const [totalrows,settotalrows]=useState(0)
     console.log(payload);
 
 
+    try {
 
-    axios.post("http://localhost:8081/api/bill/update", payload).then(() => {
-      toast.info("Saved successfully")
-      fetchBills()
-      setSavePayload({})
+      const response = await axios.post("http://localhost:8081/api/bill/update", payload, {
+
+        headers: {
+
+          'Content-Type': 'application/json',
+
+        },
+
+        withCredentials: true,
+
+      });
+
+   
+
+      toast.info("Saved successfully");
+
+      fetchBills(); // Refresh the bill list
+
+      setSavePayload({});
+
       setRowSelectionModel([]);
-    }).catch((error) => {
-      toast.error("Something went wrong while saving")
-      setLoading(false)
-    })
+
+    } catch (error) {
+
+      toast.error(error.response?.data || "Something went wrong while saving");
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+   
 
 
   }
