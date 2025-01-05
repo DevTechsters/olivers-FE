@@ -28,6 +28,15 @@ function Header() {
           </NavLink>
         </div>
         <div className='flex items-center gap-4'>
+        <Button 
+            variant="outlined" 
+            color="primary" 
+            component={NavLink} 
+            to="/audit" 
+            className='text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition duration-200 no-underline'
+          >
+            Audit Logs
+          </Button>
           <Button 
             variant="outlined" 
             color="primary" 
