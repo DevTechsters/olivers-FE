@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, DatePicker, message, Space } from 'antd';
+import { Table, Button, Input, DatePicker, message, Space, Select  } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import '../css/auditLogs.css';
 import Header from '../components/Header';
+import moment from 'moment';
 
 const { RangePicker } = DatePicker;
 
@@ -55,13 +56,24 @@ const AuditLogs = () => {
   };
 
   const handleDateChange = (dates) => {
-    const [dateFrom, dateTo] = dates || [];
+    if (!dates || dates.length !== 2) {
+      setFilters({
+        ...filters,
+        dateFrom: null,
+        dateTo: null,
+      });
+      return;
+    }
+  
+    const [startDate, endDate] = dates;
     setFilters({
       ...filters,
-      dateFrom: dateFrom ? dateFrom.toISOString() : null,
-      dateTo: dateTo ? dateTo.toISOString() : null,
+      dateFrom: startDate ? startDate.format('YYYY-MM-DD') : null,
+      dateTo: endDate ? endDate.format('YYYY-MM-DD') : null,
     });
+  
   };
+  
 
   const handlePaginationChange = (page, pageSize) => {
     setCurrentPage(page);
@@ -92,7 +104,7 @@ const AuditLogs = () => {
       dataIndex: 'modifiedAt',
       key: 'modifiedAt',
       align: 'left', // Align the text to the left
-      render: (text) => new Date(text).toLocaleString(), // Format date
+      render: (text) => text
     },
     {
       title: 'Details',
@@ -125,12 +137,18 @@ const AuditLogs = () => {
               onChange={(e) => handleFilterChange(e.target.value, 'billNo')}
               style={{ width: 200 }}
             />
-            <Input
+            {/* Dropdown for Operation Type */}
+            <Select
               placeholder="Operation Type"
               value={filters.operationType}
-              onChange={(e) => handleFilterChange(e.target.value, 'operationType')}
+              onChange={(value) => handleFilterChange(value, 'operationType')}
               style={{ width: 200 }}
-            />
+              allowClear
+            >
+              <Option value="">All</Option>
+              <Option value="UPDATE">UPDATE</Option>
+              <Option value="DELETE">DELETE</Option>
+            </Select>
             <RangePicker
               format="YYYY-MM-DD"
               onChange={handleDateChange}
