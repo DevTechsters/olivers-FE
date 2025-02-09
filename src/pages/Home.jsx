@@ -24,7 +24,7 @@ import _, { iteratee } from 'lodash';
 import SaveIcon from '@mui/icons-material/Save';
 import moment from 'moment';
 import ExportModal from './Export';
-
+import { handleApiError } from "../helpers/errorHandler";
 
 
 
@@ -336,8 +336,9 @@ export default function Home() {
       setRowSelectionModel([]);
 
     } catch (error) {
+      handleApiError(error)
       console.error('Error deleting bill:', error);
-      toast.error('Error deleting bill')
+      
     }
   };
 
@@ -435,8 +436,7 @@ export default function Home() {
         fetchBills(); // Fetch the updated data directly
         toggle();
     } catch (error) {
-        toast.error(error.response);
-    }
+      handleApiError(error)    }
 }
 
 
@@ -597,8 +597,9 @@ const [totalrows,settotalrows]=useState(0)
       setRows(billsData);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching bills:', error);
+      console.error('Error fetching bills:', error);''
       setLoading(false);
+      handleApiError(error)
     }
   };
 
@@ -611,6 +612,7 @@ const [totalrows,settotalrows]=useState(0)
     } catch (error) {
       console.error('Error fetching bills:', error);
       setLoading(false);
+      handleApiError(error)
     }
   }
 
@@ -627,6 +629,8 @@ const [totalrows,settotalrows]=useState(0)
       })));
     } catch (error) {
       console.error('Error searching data:', error);
+      handleApiError(error)
+
     } finally {
       setLoading(false);
     }
@@ -718,7 +722,8 @@ const [totalrows,settotalrows]=useState(0)
 
     } catch (error) {
 
-      toast.error(error.response?.data || "Something went wrong while saving");
+      handleApiError(error);
+      throw error;
 
     } finally {
 
@@ -953,7 +958,6 @@ const [totalrows,settotalrows]=useState(0)
                     <Label>Payment Method *</Label>
                     <Select
                       options={[
-                        { value: 'CHEQUE', label: 'Cheque' },
                         { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
                         { value: 'DAMAGE', label: 'Damage' },
                         { value: 'CLAIM', label: 'Claim' },

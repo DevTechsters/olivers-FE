@@ -5,6 +5,8 @@ import Button from '@mui/material/Button';
 import Header from '../components/Header';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { handleApiError } from "../helpers/errorHandler";
+
 
 const FileUpload = () => {
   const [file, setFile] = useState(null);
@@ -55,8 +57,9 @@ const FileUpload = () => {
       setSuccess('File uploaded successfully');
       toast.success(`File uploaded successfully by ${response.data.uploadedBy}`);
     } catch (err) {
-      setError(err.response?.data || 'Error uploading file');
-      toast.error(err.response?.data || 'Error uploading file');
+      handleApiError(err)
+      // setError(err.response?.data || 'Error uploading file');
+      // toast.error(err.response?.data || 'Error uploading file');
     } finally {
       setUploading(false);
     }

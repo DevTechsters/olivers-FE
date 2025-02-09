@@ -4,7 +4,7 @@ import { Table, Button, Input, DatePicker, message, Space, Select  } from 'antd'
 import { SearchOutlined } from '@ant-design/icons';
 import '../css/auditLogs.css';
 import Header from '../components/Header';
-import moment from 'moment';
+import { handleApiError } from "../helpers/errorHandler";
 
 const { RangePicker } = DatePicker;
 
@@ -44,8 +44,8 @@ const AuditLogs = () => {
       message.success('Audit logs fetched successfully!');
     } catch (error) {
       // Handle errors if API call fails
+      handleApiError(error);
       console.error('Error fetching audit logs:', error);
-      message.error('Failed to fetch audit logs.');
     } finally {
       setLoading(false); // Reset loading state
     }

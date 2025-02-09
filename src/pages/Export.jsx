@@ -3,6 +3,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Col, Label, Input, But
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import moment from 'moment';
+import { handleApiError } from "../helpers/errorHandler";
 
 const ExportModal = ({ isOpen, toggle }) => {
   const [exportType, setExportType] = useState('daily');
@@ -68,26 +69,16 @@ const ExportModal = ({ isOpen, toggle }) => {
         },
         headers: {
           'Content-Type': 'application/json',
-        },
-        responseType: 'arraybuffer'  // Important for downloading files
-      });
+        }      });
 
-      const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-
-      const fileName = `BillsReport_${moment().format('DD-MM-YYYY')}.xlsx`;
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      link.click();
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Export successful');
+        if (response.status === 200 && response.data) {
+          toast.success('Your report has been successfully exported. Check your Downloads folder.');
+          toggle();
+      }
+     
     } catch (error) {
+      handleApiError(error)
       console.error('Export error:', error);
-      toast.error('Export failed');
     } finally {
       setLoading(false);
     }
@@ -105,48 +96,25 @@ const handleRangeExport = async () => {
       
       const payload = {
         reportType: 2,
-        brand: ['ChocoLoco'],
-        salesManName: ['Mohan'],
-        beat: [],
         dateFrom: dateRange.fromDate,
         dateTo: dateRange.toDate
       };
   
       const response = await axios.post(endpoint, payload, {
-        responseType: 'blob',
+        // responseType: 'blob',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         }
       });
   
       if (response.status === 200 && response.data) {
-        const url = window.URL.createObjectURL(
-          new Blob([response.data], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          })
-        );
-        
-        const link = document.createElement('a');
-        const fileName = response.headers['content-disposition']
-          ? response.headers['content-disposition'].split('filename=')[1].replace(/"/g, '')
-          : `range-export-${moment().format('YYYY-MM-DD')}.xlsx`;
-        
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-  
-        toast.success('Export completed successfully');
+        toast.success('Your report has been successfully exported. Check your Downloads folder.');
         toggle();
-      } else {
-        toast.error('No data available for export');
-      }
+    }
+    
     } catch (error) {
-      console.error('Export failed:', error);
-      toast.error(error.response?.data?.message || 'Failed to export data');
+    //  console.error('Export failed:', error);
+      handleApiError(error)
     } finally {
       setLoading(false);
     }

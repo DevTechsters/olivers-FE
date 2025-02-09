@@ -5,6 +5,9 @@ import { useDispatch } from 'react-redux';
 import { login } from '../redux/authSlice';
 import { toast } from 'react-toastify';
 
+import { handleApiError } from "../helpers/errorHandler";
+
+
 const LoginPage = () => {
   const dispatch = useDispatch();
   const [username, setUsername] = useState('');
@@ -31,14 +34,16 @@ const LoginPage = () => {
         toast.info("Logged in successfully");
         navigate("/home");
     } catch (error) {
-        if (error.response) {
-            const { message, status, path } = error.response.data || {};
-            setErrorMessage(`${message || 'Error'} (Status: ${status || 'Unknown'} at ${path || 'Unknown path'})`);
-        } else if (error.request) {
-            setErrorMessage('No response received');
-        } else {
-            setErrorMessage('Error setting up the request');
-        }
+      handleApiError(error);
+
+        // if (error.response) {
+        //     const { message, status, path } = error.response.data || {};
+        //     setErrorMessage(`${message || 'Error'} (Status: ${status || 'Unknown'} at ${path || 'Unknown path'})`);
+        // } else if (error.request) {
+        //     setErrorMessage('No response received');
+        // } else {
+        //     setErrorMessage('Error setting up the request');
+        // }
     }
 };
   
