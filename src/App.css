@@ -1,3 +1,299 @@
+/* app.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Professional Color Scheme */
+  --primary-color: #1a365d;       /* Navy blue */
+  --secondary-color: #f8fafc;     /* Light background */
+  --accent-color: #2563eb;        /* Bright blue */
+  --success-color: #059669;       /* Emerald green */
+  --warning-color: #d97706;       /* Amber */
+  --error-color: #dc2626;         /* Crimson red */
+  --text-dark: #111827;           /* Charcoal */
+  --text-light: #f9fafb;          /* Off-white */
+  --border-color: #e5e7eb;        /* Light gray */
+
+  /* Spacing */
+  --space-unit: 1rem;
+  --space-xs: calc(0.25 * var(--space-unit));
+  --space-sm: calc(0.5 * var(--space-unit));
+  --space-md: var(--space-unit);
+  --space-lg: calc(1.5 * var(--space-unit));
+  --space-xl: calc(2 * var(--space-unit));
+}
+
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+body {
+  @apply bg-white min-h-screen;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-dark);
+}
+
+/* Enhanced Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Typography */
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Table System */
+.ant-table {
+  @apply rounded-xl shadow-lg overflow-hidden border border-gray-200;
+  background: var(--secondary-color);
+  
+  .ant-table-thead > tr > th {
+    @apply bg-[var(--primary-color)] text-[var(--text-light)] font-semibold tracking-wide;
+    border-bottom: 2px solid var(--accent-color) !important;
+    transition: all 0.3s ease;
+  }
+
+  .ant-table-tbody {
+    > tr {
+      @apply transition-all duration-200;
+      
+      > td {
+        @apply bg-white/90 border-b border-gray-100/30;
+      }
+
+      &:nth-child(even) > td {
+        @apply bg-gray-50/90;
+      }
+
+      &:hover > td {
+        @apply bg-white transform scale-[1.01] shadow-md;
+      }
+    }
+  }
+}
+
+/* Status System */
+.highlighted-row {
+  @apply bg-blue-50 !important;
+}
+
+.status-badge {
+  @apply px-3 py-1 rounded-full text-sm font-medium tracking-wide;
+
+  &.delivered {
+    @apply bg-green-100 text-green-800;
+  }
+  &.partially-delivered {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  &.pending {
+    @apply bg-red-100 text-red-800;
+  }
+  &.cancelled {
+    @apply bg-gray-200 text-gray-700;
+  }
+}
+
+/* Interactive Elements */
+.button-transition {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.ant-btn-primary {
+  @apply bg-[var(--primary-color)] border-[var(--primary-color)] text-white;
+  transition: all 0.3s ease;
+
+  &:hover {
+    @apply bg-[#404B8A] border-[#404B8A] transform -translate-y-0.5 shadow-lg;
+  }
+}
+
+/* Form Elements */
+.enhanced-input {
+  @apply rounded-lg border-2 border-[var(--primary-color)] px-3 py-2;
+  transition: all 0.3s ease;
+
+  &:focus {
+    @apply ring-2 ring-[var(--primary-color)] ring-opacity-30 border-[var(--primary-color)];
+    box-shadow: 0 0 0 3px rgba(47, 60, 126, 0.1);
+  }
+}
+
+/* Resizable Columns */
+.react-resizable-handle {
+  @apply absolute right-0 bottom-0 top-0 w-2 cursor-col-resize z-10;
+  
+  &::after {
+    @apply content-[''] absolute right-[3px] top-1/2 -translate-y-1/2 h-8 w-[2px] bg-gray-300;
+    transition: all 0.2s ease;
+  }
+
+  &:hover::after {
+    @apply w-[3px] bg-[var(--primary-color)];
+  }
+}
+
+/* Modal System */
+.filter-modal {
+  .ant-modal-content {
+    @apply rounded-2xl overflow-hidden;
+    background: var(--secondary-color);
+  }
+
+  .ant-select-selector {
+    @apply rounded-lg border-2 border-[var(--primary-color)] !important;
+  }
+}
+
+/* Export Animation */
+.export-btn {
+  @apply relative overflow-hidden;
+
+  &::after {
+    @apply content-[''] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 bg-white/20 rounded-full;
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  &:hover::after {
+    @apply w-[120px] h-[120px];
+  }
+}
+
+/* Color Utilities */
+.bg-darkRed { background-color: #b91c1c; }
+.bg-gold { background-color: #ca8a04; }
+.bg-forestGreen { background-color: #166534; }
+.bg-deepViolet { background-color: #4c1d95; }
+
+/* Delivery Status Selector */
+.delivery-status-select {
+  .ant-select-selector {
+    @apply rounded-full !important;
+    padding: 0 15px !important;
+  }
+
+  .ant-select-selection-item {
+    @apply font-medium !important;
+  }
+}
+
+/* Zebra Striping */
+.table-striped {
+  tbody tr:nth-child(odd) {
+    @apply bg-gray-50;
+  }
+}
+
+/* Hover Effects */
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+
+/* Scroll Optimization */
+.scroll-container {
+  overflow-anchor: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+
+/* Scrollbar Optimization */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+/* Modal Performance */
+.ant-modal-content {
+  @apply rounded-xl overflow-hidden shadow-xl;
+}
+
+/* Delivery Status Selector */
+.delivery-status-select {
+  .ant-select-selector {
+    @apply rounded-full border-gray-300 !important;
+  }
+}
+
+/* Color Utilities */
+.bg-darkRed { background-color: #b91c1c; }
+.bg-gold { background-color: #ca8a04; }
+.bg-forestGreen { background-color: #166534; }
+.bg-deepViolet { background-color: #4c1d95; }
+
+/* GPU Acceleration Helpers */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Text Rendering */
+.optimized-text {
+  text-rendering: geometricPrecision;
+}
+
+.luxury-pagination {
+  .ant-pagination-item {
+    @apply bg-transparent border border-[#3a3a3a] text-[#c5a47e];
+    
+    a {
+      @apply text-current;
+    }
+    
+    &:hover, &-active {
+      @apply border-[#c5a47e] bg-[#c5a47e]/10;
+    }
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes delayed-fade-in {
+  0% { opacity: 0; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-delayed-fade-in {
+  animation: delayed-fade-in 1.2s ease-in-out;
+}
+
+/* Custom progress animation */
+.MuiCircularProgress-root {
+  animation: circular-rotate 1.4s linear infinite;
+}
+
+@keyframes circular-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

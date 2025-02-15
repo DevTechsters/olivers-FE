@@ -1,110 +1,81 @@
-import React, { useEffect, useState } from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import MyButton from '@mui/material/Button';
-import Header from '../components/Header';
-import SearchIcon from '@mui/icons-material/Search';
-import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import Loader from '../components/Loader';
-import { styled } from '@mui/material/styles';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Col, Input, Button, Table, FormFeedback } from 'reactstrap';
+import React, { useEffect, useState,useMemo } from 'react';
+import { Modal, Button, Table, Input, Select, DatePicker,Descriptions,Divider, message, Checkbox, Row, Col } from 'antd';
+import { SearchOutlined, FilterOutlined, EditOutlined, DeleteOutlined, SaveOutlined, DownloadOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
+
 import axios from 'axios';
-import Select from 'react-select';
-import { toast } from 'react-toastify';
-import _, { iteratee } from 'lodash';
-import SaveIcon from '@mui/icons-material/Save';
 import moment from 'moment';
+import _ from 'lodash';
+import Header from '../components/Header';
+import Loader from '../components/Loader';
 import ExportModal from './Export';
+import 'react-resizable/css/styles.css';
+import { Resizable } from 'react-resizable';
+import { handleApiError } from "../helpers/errorHandler";
+
+const { Option } = Select;
+const { TextArea } = Input;
 
 
 
+// Resizable Header Cell Component
+const ResizableTitle = (props) => {
+  const { onResize, width, ...restProps } = props;
 
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <Resizable
+      width={width}
+      height={0}
+      handle={
+        <span
+          className="react-resizable-handle"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            right: -5,
+            bottom: 0,
+            top: 0,
+            width: 10,
+            cursor: 'col-resize',
+          }}
+        />
+      }
+      onResize={onResize}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <th {...restProps} />
+    </Resizable>
+  );
+};
 
 
 
 export default function Home() {
 
+  
+
+   // Add state for editing
+   const [editingKey, setEditingKey] = useState('');
+   const [editingField, setEditingField] = useState('');
+
   const [exportModal, setExportModal] = useState(false);
-
-  // Function to toggle the modal
-
-
-  const [paginationModel, setPaginationModel] = useState({
-    page: 1,
-    pageSize: 5,  // Changed this to 5 to match API request size
-  });
+  const [paginationModel, setPaginationModel] = useState({ page: 1, pageSize: 10 });
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState({
-    id: null,
-    billNo: null
-  });
-  const [deleteAll,setDeleteAll]=useState(false)
-
-  const toggleExport = () => {
-    setExportModal(!exportModal);
-  };
-
-
-  const handleDialogOpen = (id) => {
-    if(deleteAll)
-    {
-      setOpenDialog(true)
-    }
-    else
-    {
-    const rowToDelete = rows.find(row => row.id === id); // Get the row data
-    if (rowToDelete) {
-      setSelectedRowId({
-        id,
-        billNo: rowToDelete.billno
-      });
-      setOpenDialog(true); // Open the dialog
-    }
-    }
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false); // Close the dialog without any action
-  };
-
-  const handleDialogConfirm = () => {
-    if(deleteAll)
-    {
-      deletecall()
-      setOpenDialog(false)
-    }
-    else
-    {
-      handleDeleteClick(selectedRowId.id); // Trigger the delete action for the selected row
-      setOpenDialog(false); // Close the dialog after confirmation
-    }
-  };
-
-
-
-
+  const [selectedRowId, setSelectedRowId] = useState({ id: null, billNo: null });
+  const [deleteAll, setDeleteAll] = useState(false);
   const [editData, setEditdata] = useState({});
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [rows, setRows] = useState({})
+  const [rows, setRows] = useState([]);
   const [chequeEdit, setChequeEdit] = useState(null);
   const [BillsHistory, setBillsHistory] = useState([]);
-  const [addBill, setAddbill] = useState({
-    receivedAmount: 0,
-    comments: "",
-    date: ""
-  })
-  const [paymentMethod, setPaymentMethod] = useState("")
-  const [filterModal, setFilterModal] = useState(false)
+  const [addBill, setAddbill] = useState({ receivedAmount: 0, comments: "", date: "" });
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [filterModal, setFilterModal] = useState(false);
   const [filterData, setFilterData] = useState({
     salespersonNames: [],
     retailerNames: [],
@@ -113,41 +84,352 @@ export default function Home() {
     days: [],
   });
   const [filterConst, setFiterConst] = useState({
-    salespersonNames: [
-      "Mohan",
-      "Naveen",
-      "Murali"
-    ],
-    retailerNames: [
-      "ABC Stores",
-      "GHI Stores",
-      "DEF Stores"
-    ],
-    beats: [
-      "Beat 2",
-      "Beat 3",
-      "Beat 1"
-    ],
-    brandNames: [
-      "Mango Bite",
-      "Diary Milk",
-      "Coffee Bite"
-    ]
-  })
-  const [editPayload, setEditPayload] = useState([])
-  const [errors, setErrors] = useState({
-    receivedAmount: '',
-    date: "",
-    paymentMethod: ''
+    salespersonNames: ["Mohan", "Naveen", "Murali"],
+    retailerNames: ["ABC Stores", "GHI Stores", "DEF Stores"],
+    beats: ["Beat 2", "Beat 3", "Beat 1"],
+    brandNames: ["Mango Bite", "Diary Milk", "Coffee Bite"],
   });
-  const [chequeErrors, setChequeErrors] = useState({
-    bankName: "",
-    chequeNumber: "",
-    chequeDate: "",
-    chequeAmount: "",
-  });
+  const [editPayload, setEditPayload] = useState([]);
+  const [errors, setErrors] = useState({ receivedAmount: '', date: "", paymentMethod: '' });
+  const [chequeErrors, setChequeErrors] = useState({ bankName: "", chequeNumber: "", chequeDate: "", chequeAmount: "" });
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
-  const [chequeModal, setChequeModal] = useState(false)
+  const [chequeModal, setChequeModal] = useState(false);
+
+/// At the beginning of your component, add this state for the delete modal
+const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+// Update these functions for the delete functionality
+
+// Single delete
+const handleDeleteClick = (id) => {
+  const rowToDelete = rows.find(row => row.id === id);
+  if (rowToDelete) {
+    setSelectedRowId({
+      id,
+      billNo: rowToDelete.billno
+    });
+    setDeleteAll(false);
+    setDeleteModalVisible(true);
+  }
+};
+
+// Bulk delete
+const handleBulkDelete = () => {
+  if (rowSelectionModel.length === 0) return;
+  setDeleteAll(true);
+  setDeleteModalVisible(true);
+};
+
+// Confirm dialog handler
+const handleDialogConfirm = () => {
+  if (deleteAll) {
+    deleteBillApi(rowSelectionModel);
+  } else {
+    deleteBillApi([selectedRowId.id]);
+  }
+  setDeleteModalVisible(false);
+};
+
+// Cancel dialog handler
+const handleDialogClose = () => {
+  setDeleteModalVisible(false);
+};
+
+// Confirm dialog handler
+
+
+  // Update the ChequeModal component with enhanced validation and features
+
+
+  const ChequeModal = () => {
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+    
+    const [chequeData, setChequeData] = useState({
+      bankName: "",
+      chequeNumber: "",
+      chequeDate: "",
+      chequeAmount: "",
+      isCleared: false,
+      isBounced: false,
+      bounceAmt: 0,
+    });
+  
+    const [chequeErrors, setChequeErrors] = useState({});
+  
+    useEffect(() => {
+      if (chequeModal) {
+        setHasAttemptedSubmit(false);
+        setChequeErrors({});
+        setChequeData({
+          bankName: "",
+          chequeNumber: "",
+          chequeDate: "",
+          chequeAmount: "",
+          isCleared: false,
+          isBounced: false,
+          bounceAmt: 0
+        });
+      }
+    }, [chequeModal]);
+  
+    const validateChequeForm = () => {
+      const newErrors = {};
+      
+      if (!chequeData.bankName?.trim()) {
+        newErrors.bankName = 'Bank name is required';
+      }
+      
+      if (!chequeData.chequeNumber?.trim()) {
+        newErrors.chequeNumber = 'Cheque number is required';
+      }
+      
+      if (!chequeData.chequeDate) {
+        newErrors.chequeDate = 'Cheque date is required';
+      }
+      
+      if (!chequeData.chequeAmount || chequeData.chequeAmount <= 0) {
+        newErrors.chequeAmount = 'Valid cheque amount is required';
+      }
+      
+      if (chequeData.isBounced && (!chequeData.bounceAmt || chequeData.bounceAmt <= 0)) {
+        newErrors.bounceAmt = 'Bounce amount is required when cheque is marked as bounced';
+      }
+  
+      setChequeErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+  
+   // Inside the ChequeModal component, modify the handleChequeAdd function:
+
+   const handleChequeAdd = () => {
+    if (!validateChequeForm()) {
+      message.error("Please fill all mandatory fields");
+      return;
+    }
+  
+    const newCheque = {
+      bankName: chequeData.bankName,
+      chequeNumber: chequeData.chequeNumber,
+      chequeDate: chequeData.chequeDate,
+      chequeAmount: chequeData.chequeAmount,
+      isCleared: chequeData.isCleared,
+      isBounced: chequeData.isBounced,
+      bounceAmt: chequeData.bounceAmt
+    };
+  
+    // Update local state
+    let rowObj = _.cloneDeep(rows);
+    rowObj[chequeEdit].chequeHistory = [
+      ...rowObj[chequeEdit].chequeHistory,
+      newCheque
+    ];
+    setRows(rowObj);
+  
+    // Update save payload - ONLY add the new cheque
+    const invoiceId = rowObj[chequeEdit].invoiceId;
+    setSavePayload(prev => ({
+      ...prev,
+      [invoiceId]: {
+        ...prev[invoiceId],
+        cheques: [
+          ...(prev[invoiceId]?.cheques || []),
+          newCheque
+        ]
+      }
+    }));
+  
+    // Reset form and close modal
+    setChequeData(initialChequeState);
+    setChequeModal(false);
+    message.success("Cheque added successfully");
+  };
+
+    const handleInputChange = (field, value) => {
+      setChequeData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+      
+      if (hasAttemptedSubmit) {
+        setChequeErrors(prev => ({
+          ...prev,
+          [field]: undefined
+        }));
+      }
+    };
+  
+    return (
+      <Modal
+        title="Cheque Details"
+        open={chequeModal}
+        onCancel={() => setChequeModal(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setChequeModal(false)}>
+            Cancel
+          </Button>,
+          <Button key="add" type="primary" onClick={handleChequeAdd}>
+            Add Cheque
+          </Button>,
+        ]}
+        width={1000}
+      >
+
+      <div className="space-y-6">
+        {/* Cheque Form Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Add New Cheque</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Input
+                placeholder="Bank Name"
+                value={chequeData.bankName}
+                onChange={e => handleInputChange('bankName', e.target.value)}
+                status={hasAttemptedSubmit && chequeErrors.bankName ? "error" : ""}
+              />
+              {hasAttemptedSubmit && chequeErrors.bankName && (
+                <div className="text-red-500 text-sm mt-1">{chequeErrors.bankName}</div>
+              )}
+            </div>
+            
+            <div>
+              <Input
+                placeholder="Cheque Number"
+                value={chequeData.chequeNumber}
+                onChange={e => handleInputChange('chequeNumber', e.target.value)}
+                status={hasAttemptedSubmit && chequeErrors.chequeNumber ? "error" : ""}
+              />
+              {hasAttemptedSubmit && chequeErrors.chequeNumber && (
+                <div className="text-red-500 text-sm mt-1">{chequeErrors.chequeNumber}</div>
+              )}
+            </div>
+
+            <div>
+              <DatePicker
+                placeholder="Cheque Date"
+                value={chequeData.chequeDate ? moment(chequeData.chequeDate) : null}
+                onChange={date => handleInputChange('chequeDate', date)}
+                status={hasAttemptedSubmit && chequeErrors.chequeDate ? "error" : ""}
+                style={{ width: '100%' }}
+              />
+              {hasAttemptedSubmit && chequeErrors.chequeDate && (
+                <div className="text-red-500 text-sm mt-1">{chequeErrors.chequeDate}</div>
+              )}
+            </div>
+
+            <div>
+              <Input
+                type="number"
+                placeholder="Cheque Amount"
+                value={chequeData.chequeAmount}
+                onChange={e => handleInputChange('chequeAmount', Number(e.target.value))}
+                status={hasAttemptedSubmit && chequeErrors.chequeAmount ? "error" : ""}
+              />
+              {hasAttemptedSubmit && chequeErrors.chequeAmount && (
+                <div className="text-red-500 text-sm mt-1">{chequeErrors.chequeAmount}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex space-x-4">
+              <Checkbox
+                checked={chequeData.isCleared}
+                onChange={e => {
+                  handleInputChange('isCleared', e.target.checked);
+                  if (e.target.checked) {
+                    handleInputChange('isBounced', false);
+                    handleInputChange('bounceAmt', 0);
+                  }
+                }}
+              >
+                Cleared
+              </Checkbox>
+              
+              <Checkbox
+                checked={chequeData.isBounced}
+                onChange={e => {
+                  handleInputChange('isBounced', e.target.checked);
+                  if (e.target.checked) {
+                    handleInputChange('isCleared', false);
+                  }
+                }}
+              >
+                Bounced
+              </Checkbox>
+            </div>
+
+            {chequeData.isBounced && (
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Bounce Amount"
+                  value={chequeData.bounceAmt}
+                  onChange={e => handleInputChange('bounceAmt', Number(e.target.value))}
+                  status={hasAttemptedSubmit && chequeErrors.bounceAmt ? "error" : ""}
+                />
+                {hasAttemptedSubmit && chequeErrors.bounceAmt && (
+                  <div className="text-red-500 text-sm mt-1">{chequeErrors.bounceAmt}</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+       
+
+        {/* Cheque History Section (if needed) */}
+        {rows[chequeEdit]?.chequeHistory?.length > 0 && (
+          <>
+            <Divider orientation="left">Cheque History</Divider>
+            <Table
+              dataSource={rows[chequeEdit].chequeHistory}
+              columns={[
+                { title: 'Bank', dataIndex: 'bankName', width: 120 },
+                { title: 'Cheque No', dataIndex: 'chequeNumber', width: 120 },
+                { 
+                  title: 'Date', 
+                  dataIndex: 'chequeDate',
+                  width: 120,
+                  render: (date) => moment(date).format('DD/MM/YYYY')
+                },
+                { 
+                  title: 'Amount', 
+                  dataIndex: 'chequeAmount',
+                  width: 120,
+                  render: (amount) => `₹${amount.toLocaleString()}`
+                },
+                {
+                  title: 'Status',
+                  width: 150,
+                  render: (_, record) => (
+                    <div>
+                      {record.isCleared && <span className="text-green-600">Cleared</span>}
+                      {record.isBounced && (
+                        <div>
+                          <span className="text-red-600">Bounced</span>
+                          {record.bounceAmt > 0 && (
+                            <div className="text-sm text-gray-500">
+                              Bounce Amount: ₹{record.bounceAmt.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {!record.isCleared && !record.isBounced && <span className="text-yellow-600">Pending</span>}
+                    </div>
+                  )
+                }
+              ]}
+              pagination={false}
+              size="small"
+              bordered
+            />
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+};
+  
   const [chequeData, setChequeData] = useState({
     bankName: "",
     chequeNumber: "",
@@ -155,107 +437,476 @@ export default function Home() {
     chequeAmount: "",
     isCleared: false,
     isBounced: false,
-    bounceAmt: 0
-  })
+    bounceAmt: 0,
+  });
+  const [savePayload, setSavePayload] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debounceTimeout, setDebounceTimeout] = useState(null);
+  const [totalrows, settotalrows] = useState(0);
 
-  const [savePayload, setSavePayload] = useState({})
-  const [searchQuery, setSearchQuery] = useState("")
-  const [debounceTimeout, setDebounceTimeout] = useState(null)
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  const getRowClassName = (record) => {
+    if (record.deliveryStatus === "Pending") {
+      return 'bg-darkRed';
+    } else if (record.deliveryStatus === "Partially Delivered") {
+      return 'bg-gold';
+    } else if (record.deliveryStatus === "Delivered") {
+      return 'bg-forestGreen';
+    } else {
+      return 'bg-deepViolet';
+    }
+  };
 
-  const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
-    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
-      outline: 'none',
-    },
-    '& .MuiDataGrid-cell:hover': {
-      backgroundColor: 'transparent',
-    },
-    '& .actions': {
-      color: theme.palette.text.primary,
-      '&:hover': {
-        backgroundColor: 'transparent',
-      },
-      '& .MuiIconButton-root': {
-        padding: 0,
-      },
-    },
+  // Add new state for column widths
+const [columnWidths, setColumnWidths] = useState({});
+
+  // Save widths when changed
+useEffect(() => {
+  localStorage.setItem('columnWidths', JSON.stringify(columnWidths));
+}, [columnWidths]);
+
+// Load saved widths on component mount
+useEffect(() => {
+  const savedWidths = localStorage.getItem('columnWidths');
+  if (savedWidths) {
+    setColumnWidths(JSON.parse(savedWidths));
+  }
+}, []);
+
+
+
+
+
+
+// Handle column resize
+const handleResize = (index) => (e, { size }) => {
+  const newColumns = [...columns];
+  newColumns[index] = {
+    ...newColumns[index],
+    width: size.width,
+  };
+  
+  // Update column widths state
+  setColumnWidths(prev => ({
+    ...prev,
+    [newColumns[index].dataIndex]: size.width,
   }));
-  const deliveryStatusOptions = [
-    { value: 'Delivered', label: 'Delivered' },
-    { value: 'Partially Delivered', label: 'Partially Delivered' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Cancelled', label: 'Cancelled' },
-  ];
-  // Handle delivery status change
-  // Handle delivery status change
-  const handleDeliveryStatusChange = (selectedOption, id, invoiceId) => {
-    // Update local state
-    setRows(prevRows =>
-      prevRows.map(row =>
-        row.id === id ? { ...row, deliveryStatus: selectedOption.value } : row
+};
+
+// Merge the column definitions with resize functionality
+const getResizableColumns = () => {
+  return columns.map((col, index) => ({
+    ...col,
+    width: columnWidths[col.dataIndex] || col.width,
+    onHeaderCell: (column) => ({
+      width: column.width,
+      onResize: handleResize(index),
+    }),
+  }));
+};
+
+// Add custom styles for the resizable functionality
+const components = {
+  header: {
+    cell: ResizableTitle,
+  },
+};
+
+  
+  const handleCellClick = (key, field) => {
+    if (editingKey !== '') {
+      // If already editing, save the current edit before starting a new one
+      handleSave();
+    }
+    setEditingKey(key);
+    setEditingField(field);
+  };
+
+  const handleCellChange = (value, key, field) => {
+    const row = rows.find(row => row.id === key);
+    if (!row || row[field] === value) return; // Skip if no change
+  
+    // Update UI state
+    setRows(prevRows => 
+      prevRows.map(row => 
+        row.id === key ? { ...row, [field]: value } : row
       )
     );
-    const save = _.cloneDeep(savePayload)
-    if (invoiceId in save) {
-      save[invoiceId] = { ...save[invoiceId], deliveryStatus: selectedOption.value }
-    }
-    else {
-      save[invoiceId] = { ...save[invoiceId], deliveryStatus: selectedOption.value }
-    }
-    setSavePayload(save)
-  };
-  const customSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      backgroundColor: 'transparent',
-      border: 'none',
-      boxShadow: 'none',
-      '&:hover': {
-        border: 'none',
+  
+    // Update savePayload
+    const invoiceId = row.invoiceId;
+    setSavePayload(prev => ({
+      ...prev,
+      [invoiceId]: {
+        ...prev[invoiceId],
+        [field]: value,
       },
-    }),
-    valueContainer: (provided) => ({
-      ...provided,
-      padding: '0',
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      marginLeft: '0',
-    }),
-    input: (provided) => ({
-      ...provided,
-      margin: '0',
-      padding: '0',
-    }),
-    indicatorSeparator: () => ({
-      display: 'none',
-    }),
-    dropdownIndicator: (provided, state) => ({
-      ...provided,
-      color: state.isFocused ? '#4f46e5' : '#6b7280',
-      padding: '0',
-      ':hover': {
-        color: '#4f46e5',
-      },
-    }),
-    menu: (provided) => ({
-      ...provided,
-      backgroundColor: 'white',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      border: 'none',
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected
-        ? '#4f46e5'
-        : state.isFocused
-          ? '#e0e7ff'
-          : 'white',
-      color: state.isSelected ? 'white' : '#111827',
-      padding: '8px 12px',
-    }),
+    }));
   };
+  const handleSave = () => {
+
+
+    setEditingKey('');
+    setEditingField('');
+  };
+
+  
+  
+
+ 
+  const EditableCell = ({ 
+    record, 
+    dataIndex, 
+    editingKey, 
+    editingField, 
+    onCellClick, 
+    onCellChange, 
+    onSave,
+    inputType = 'text'
+  }) => {
+    const editable = record.id === editingKey && dataIndex === editingField;
+    
+    const renderEditInput = () => {
+      if (inputType === 'select') {
+        return (
+          <Select
+            value={record[dataIndex]}
+            onChange={(value) => onCellChange({ target: { value } }, record.id, dataIndex)}
+            onBlur={onSave}
+            style={{ width: '100%' }}
+            autoFocus
+          >
+            <Select.Option value="Delivered">Delivered</Select.Option>
+            <Select.Option value="Partially Delivered">Partially Delivered</Select.Option>
+            <Select.Option value="Pending">Pending</Select.Option>
+            <Select.Option value="Cancelled">Cancelled</Select.Option>
+          </Select>
+        );
+      }
+      
+      return (
+        <Input
+        value={record[dataIndex]}
+        onChange={(e) => onCellChange(e.target.value, record.id, dataIndex)}
+        onBlur={onSave}
+        onPressEnter={onSave}
+        autoFocus
+      />
+        
+      );
+    };
+  
+    return editable ? (
+      <div className="editable-cell-value-wrapper">
+        {renderEditInput()}
+      </div>
+    ) : (
+      <div 
+        className="editable-cell-value-wrapper"
+        onClick={() => onCellClick(record.id, dataIndex)}
+        style={{ cursor: 'pointer' }}
+      >
+        {record[dataIndex] ?? 'Click to edit'}
+      </div>
+    );
+  };
+  
+
+
+  const columns = [
+    {
+      title: 'Actions',
+      dataIndex: 'actions',
+      fixed: 'left',
+      width: 100,
+      render: (_, record) => (
+        <>
+          <Button icon={<EditOutlined />} onClick={handleEditClick(record.id)} />
+          <Button icon={<DeleteOutlined />} onClick={() => handleDeleteClick(record.id)} />
+        </>
+      ),
+    },
+    { title: 'Brand', dataIndex: 'brand', width: 120 },
+    { title: 'Salesperson', dataIndex: 'salespersonName', width: 150 },
+    { title: 'Beat', dataIndex: 'beat', width: 100 },
+    { title: 'Bill No', dataIndex: 'billno', width: 100 },
+    { 
+      title: 'Bill Date', 
+      dataIndex: 'billdate', 
+      width: 120, 
+      render: (text) => moment(text).format('DD/MM/YYYY') 
+    },
+    { 
+      title: 'Due Days', 
+      width: 100,
+      render: (text, record) => {
+        const billDate = moment(record.billdate);
+        const currentDate = moment();
+        const diff = billDate.diff(currentDate, 'days');
+        return diff >= 0 ? diff : Math.abs(diff);
+      }
+    },
+    { title: 'Retailer', dataIndex: 'retailerName', width: 150 },
+    { title: 'Invoice Amt', dataIndex: 'updatedInvoiceAmount', width: 120 },
+    { title: 'Balance', dataIndex: 'balance', width: 100 },
+    { title: 'Amt Received', dataIndex: 'amountReceived', width: 120 },
+    {
+      title: 'Cheque',
+      dataIndex: 'cheque',
+      width: 160, // Increased width to accommodate amount
+      render: (_, record, index) => {
+        // Calculate total cheque amount
+        const totalChequeAmount = record.chequeHistory?.reduce(
+          (sum, cheque) => sum + (cheque.chequeAmount || 0),
+          0
+        ) || 0;
+    
+        return (
+          <div className="flex items-center space-x-2">
+            <Button 
+              icon={<EditOutlined />} 
+              type="link"
+              onClick={() => {
+                setChequeEdit(index);
+                setChequeModal(true);
+                // Initialize cheque data if needed
+                if (record.chequeHistory?.length > 0) {
+                  const latestCheque = record.chequeHistory[record.chequeHistory.length - 1];
+                  setChequeData({
+                    bankName: latestCheque.bankName || "",
+                    chequeNumber: latestCheque.chequeNumber || "",
+                    chequeDate: latestCheque.chequeDate || "",
+                    chequeAmount: latestCheque.chequeAmount || "",
+                    isCleared: latestCheque.isCleared || false,
+                    isBounced: latestCheque.isBounced || false,
+                    bounceAmt: latestCheque.bounceAmt || 0
+                  });
+                }
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="font-medium text-base">
+                ₹{totalChequeAmount.toLocaleString()}
+              </span>
+              <span className="text-xs text-gray-500">
+                {record.chequeHistory?.length || 0} Cheques
+              </span>
+            </div>
+          </div>
+        );
+      }
+    },
+
+    {
+      title: 'Cash Discount',
+      dataIndex: 'cashDiscount',
+      width: 130,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="cashDiscount"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    {
+      title: 'Damage',
+      dataIndex: 'damage',
+      width: 120,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="damage"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    {
+      title: 'Claim',
+      dataIndex: 'claim',
+      width: 120,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="claim"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    {
+      title: 'Credit Note',
+      dataIndex: 'creditNote',
+      width: 130,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="creditNote"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    {
+      title: 'GPay',
+      dataIndex: 'gpay',
+      width: 120,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="gpay"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    { 
+      title: 'Cash', 
+      dataIndex: 'cash', 
+      width: 100,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="cash"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+    },
+    { title: 'Delivery Person', dataIndex: 'deliveryPerson', width: 150,
+
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="deliveryPerson"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+
+
+
+
+     },
+   // In the Delivery Status column render function
+
+  {
+    title: 'Delivery Status',
+    dataIndex: 'deliveryStatus',
+    width: 150,
+    render: (text, record) => (
+      <Select
+        className="delivery-status-select"
+        value={text}
+        onChange={value => {
+          handleCellChange(value, record.id, 'deliveryStatus');
+          handleSave();
+        }}
+        style={{ width: '100%' }}
+      >
+        <Option value="Delivered" className="delivered">Delivered</Option>
+        <Option value="Partially Delivered" className="partially-delivered">Partially Delivered</Option>
+        <Option value="Pending" className="pending">Pending</Option>
+        <Option value="Cancelled" className="cancelled">Cancelled</Option>
+      </Select>
+    ),
+  },
+    { title: 'Remarks', dataIndex: 'remarks', width: 180,
+
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="remarks"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+
+
+
+     },
+    { title: 'Created At', 
+      dataIndex: 'createdAt', 
+      width: 150,
+      render: (text) => moment(text).format('DD/MM/YYYY hh:mm a') 
+    },
+    { title: 'Created By', 
+      dataIndex: 'createdBy', 
+      width: 120 
+    },
+    { title: 'Updated By', dataIndex: 'updatedBy', width: 120 },
+    { 
+      title: 'Updated At', 
+      dataIndex: 'updatedAt', 
+      width: 150, 
+      render: (text) => moment(text).format('DD/MM/YYYY hh:mm a') 
+    },
+    { title: 'Tally Status', dataIndex: 'tallyStatus', width: 120 ,
+      render: (text, record) => (
+        <EditableCell
+          record={record}
+          dataIndex="tallyStatus"
+          editingKey={editingKey}
+          editingField={editingField}
+          onCellClick={handleCellClick}
+          onCellChange={handleCellChange}
+          onSave={handleSave}
+        />
+      )
+
+
+
+    },
+  ];
+
+  const toggleExport = () => {
+    setExportModal(!exportModal);
+  };
+
+  const handleDialogOpen = (id) => {
+    if (deleteAll) {
+      setOpenDialog(true);
+    } else {
+      const rowToDelete = rows.find(row => row.id === id);
+      if (rowToDelete) {
+        setSelectedRowId({
+          id,
+          billNo: rowToDelete.billno
+        });
+        setOpenDialog(true);
+      }
+    }
+  };
+
+
+
 
   const toggle = () => {
     setModal(!modal);
@@ -263,27 +914,21 @@ export default function Home() {
       receivedAmount: 0,
       comments: "",
       date: ""
-    })
-    setPaymentMethod("")
-    setEditPayload([])
+    });
+    setPaymentMethod("");
+    setEditPayload([]);
     setErrors({
       receivedAmount: '',
       date: "",
       paymentMethod: ''
-    })
-  }
+    });
+  };
 
   const toggleFilter = () => {
-    setFilterModal(!filterModal)
-    // setFilterData({
-    //   salespersonNames: [],
-    //   retailerNames: [],
-    //   beats: [],
-    //   brandNames: [],
-    //   days: [],
-    // })
-  }
+    setFilterModal(!filterModal);
+  };
 
+  
   const toggleCheque = () => {
     if (chequeModal === true) {
       if (validateCheque()) {
@@ -298,10 +943,10 @@ export default function Home() {
     }
   }
 
-
+  
   const handleAddbill = (e) => {
-    setAddbill({ ...addBill, [e.target.id]: e.target.value })
-  }
+    setAddbill({ ...addBill, [e.target.id]: e.target.value });
+  };
 
   const validateCheque = () => {
     let arr = rows[chequeEdit].chequeHistory
@@ -313,70 +958,56 @@ export default function Home() {
       }
     })
 
+
     return valid
   }
 
-  const handlePaymentMethod = (e) => {
-    setPaymentMethod(e.label)
-  }
-
-  const handleEditClick = (id) => () => {
-    setModal(true);
-    setEditdata(rows[id]);
-    setBillsHistory(rows[id].billsHistory);
+  const handlePaymentMethod = (value) => {
+    setPaymentMethod(value);
   };
+
+  // In handleEditClick, ensure billsHistory is properly initialized
+const handleEditClick = (id) => () => {
+  const rowToEdit = rows.find((row) => row.id === id);
+  if (rowToEdit) {
+    setEditdata(rowToEdit);
+    // Initialize with existing bills history from row data
+    setBillsHistory(rowToEdit.billsHistory || []);
+    setModal(true);
+  }
+};
+
   const deleteBillApi = async (invoiceId) => {
     try {
       const response = await axios.delete("http://localhost:8081/api/bill/delete", {
         data: { invoiceIds: invoiceId },
-        withCredentials: true, 
+        withCredentials: true,
       });
-      toast.success("Deleted sucessfully")
+      message.success("Deleted successfully");
       fetchBills();
       setRowSelectionModel([]);
-
     } catch (error) {
       console.error('Error deleting bill:', error);
-      toast.error('Error deleting bill')
+      message.error('Error deleting bill');
     }
   };
 
 
-
-  const handleDeleteClick = (id) => {
-    // Find the row that corresponds to the clicked delete icon
-    const rowToDelete = rows.find(row => row.id === id);
-
-    // Proceed only if the row is part of the selected rows
-    if (rowToDelete) {
-      const invoiceId = [rowToDelete.invoiceId]; // Retrieve billno or invoiceId from the found row
-
-      // Log the retrieved billno
-      console.log('Deleting invoiceId for specific row:', invoiceId);
-
-      // Call the API to delete the bill
-      deleteBillApi(invoiceId)
-    } else {
-      console.error("Row is not selected or not found for id:", id);
-    }
-  };
 
 
 
   const validateForm = () => {
     const newErrors = {};
-    if (!addBill.receivedAmount) {
-      newErrors.receivedAmount = 'Amount is required';
+    if (!addBill.receivedAmount || addBill.receivedAmount <= 0) {
+      newErrors.receivedAmount = 'Valid amount is required';
     }
-
     if (!addBill.date) {
       newErrors.date = 'Date is required';
     }
-
     if (!paymentMethod) {
-      newErrors.paymentMethod = "Payment Method is required"
+      newErrors.paymentMethod = "Payment Method is required";
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -403,163 +1034,73 @@ export default function Home() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddClick = () => {
-    if (!validateForm()) {
-      toast.error("Fill mandatory fields")
+  
+const handleAddClick = () => {
+  if (!validateForm()) {
+    message.error("Please fill all mandatory fields"); // Changed from toast
       return;
-    }
-    let username = sessionStorage.getItem("user")
-    let arr = _.cloneDeep(BillsHistory)
-    arr.push({ ...addBill, paymentMethod: paymentMethod, createdBy: username })
-    setBillsHistory(arr)
-    let payloadArr = _.cloneDeep(editPayload)
-    payloadArr.push({ ...addBill, paymentMethod: paymentMethod, createdBy: username })
-    setEditPayload(payloadArr)
-    setAddbill({
+  }
+
+  let username = sessionStorage.getItem("user");
+
+  // Format the date to yyyy-MM-dd before sending
+  let formattedDate = moment(addBill.date, "DD/MM/YYYY").format("YYYY-MM-DD");
+
+  let newBill = {
+      ...addBill,
+      date: formattedDate, 
+      paymentMethod: paymentMethod,
+      createdBy: username
+  };
+
+  let arr = _.cloneDeep(BillsHistory);
+  arr.push(newBill);
+  setBillsHistory(arr);
+
+  let payloadArr = _.cloneDeep(editPayload);
+  payloadArr.push(newBill);
+  setEditPayload(payloadArr);
+
+  setAddbill({
       receivedAmount: 0,
       comments: "",
       date: ""
-    })
-    toast.info("Added Succesfully")
+  });
 
+  message.success("Payment added successfully"); // Changed from toast
+};
+
+// 1. Fix the saveEdit function to properly handle state updates and data refreshing
+const saveEdit = async () => {
+  try {
+    // Send the edit payload
+    await axios.post(
+      `http://localhost:8081/api/bill/edit/${editData.invoiceId}`,
+      editPayload,
+      { withCredentials: true }
+    );
+
+    // Show success message
+    message.success("Saved successfully");
+    
+    // Refresh bills data
+    await fetchBills();
+    
+    // Reset edit payload to prevent duplicate submissions
+    setEditPayload([]);
+    
+    // Close the modal
+    toggle();
+  } catch (error) {
+    handleApiError(error);
+    console.error('Save error:', error);
   }
+};
 
-  const saveEdit = async () => {
-    console.log(editPayload);
-
-    try {
-        await axios.post(`http://localhost:8081/api/bill/edit/${editData.invoiceId}`, editPayload, {
-            withCredentials: true
-        });
-        toast.info("Saved successfully");
-        fetchBills(); // Fetch the updated data directly
-        toggle();
-    } catch (error) {
-        toast.error(error.response);
-    }
-}
-
-
-
-
-  const columns = [
-    {
-      field: 'actions',
-      type: 'actions',
-      headerAlign: 'center',
-      headerName: 'Actions',
-      width: 150,
-      cellClassName: 'actions',
-      getActions: ({ id }) => [
-        <GridActionsCellItem
-          icon={<EditIcon />}
-          label="Edit"
-          className="textPrimary"
-          onClick={handleEditClick(id)}
-          color="inherit"
-        />,
-        <GridActionsCellItem
-          icon={<DeleteIcon />}
-          label="Delete"
-          onClick={() => handleDialogOpen(id)}  // Open the dialog on delete click
-          //onClick={() => handleDeleteClick(id)}
-          color="inherit"
-        />,
-      ],
-
-    },
-    { field: 'brand', headerName: 'Brand', headerAlign: 'center', width: 120 },
-    { field: 'salespersonName', headerName: 'Salesperson Name', headerAlign: 'center', width: 150 },
-    { field: 'beat', headerName: 'Beat', headerAlign: 'center', width: 120 },
-    { field: 'billno', headerName: 'Bill No', headerAlign: 'center', width: 100 },
-    { field: 'billdate', headerName: 'Bill Date', headerAlign: 'center', width: 100, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY'); } },
-    {
-      field: 'dueday',
-      headerName: 'Due days',
-      width: 120,
-      renderCell: (params) => {
-        const billDate = moment(params.row.billdate); // Parse the bill date
-        const currentDate = moment(); // Get the current date
-        const diff = billDate.diff(currentDate, 'days'); // Calculate difference in days
-
-        // Return the absolute value of the difference
-        return diff >= 0 ? diff : Math.abs(diff);
-      },
-    },
-    { field: 'retailerName', headerName: 'Retailer Name', headerAlign: 'center', width: 150 },
-    { field: 'updatedInvoiceAmount', headerName: 'Invoice Amount', headerAlign: 'center', width: 130 },
-    { field: 'balance', headerName: 'Balance', headerAlign: 'center', width: 100 },
-    { field: 'amountReceived', headerName: 'Amount Received', headerAlign: 'center', width: 130 },
-    {
-      field: 'cheque', headerName: 'Cheque', headerAlign: 'center', width: 120, editable: true,
-      renderCell: (params, row) => {
-        return (
-          <>
-            <p>{params.value} <GridActionsCellItem
-              icon={<EditIcon />}
-              label="Edit"
-              className="textPrimary"
-              onClick={(e) => {
-                setChequeEdit(params.id)
-                toggleCheque()
-              }}
-              color="inherit"
-            /></p>
-          </>
-        )
-      },
-    },
-    { field: 'cashDiscount', headerName: 'Cash Discount', width: 130, headerAlign: 'center', editable: true },
-    { field: 'damage', headerName: 'Damage', width: 120, headerAlign: 'center', editable: true },
-    { field: 'claim', headerName: 'Claim', width: 120, headerAlign: 'center', editable: true },
-    { field: 'creditNote', headerName: 'Credit Note', width: 130, headerAlign: 'center', editable: true },
-    { field: 'gpay', headerName: 'GPay', width: 120, headerAlign: 'center', editable: true },
-    { field: 'cash', headerName: 'Cash', width: 130, headerAlign: 'center', editable: true },
-    { field: 'deliveryPerson', headerName: 'Delivery Person', width: 130, headerAlign: 'center', editable: true },
-    {
-
-      field: 'deliveryStatus',
-      headerName: 'Delivery Status',
-      width: 200,
-      headerAlign: 'center',
-      editable: true,
-      renderCell: (params) => {
-        const status = deliveryStatusOptions.find(option => option.value === params.value);
-        return (
-          <Select
-            value={status}
-            onChange={(selectedOption) => handleDeliveryStatusChange(selectedOption, params.id, params.row.invoiceId)}
-            options={deliveryStatusOptions}
-            styles={customSelectStyles}
-            placeholder="Select status"
-            isClearable={false}
-            menuPortalTarget={document.body}
-            components={{
-              IndicatorSeparator: () => null
-            }}
-          />
-        );
-      },
-    },
-
-    { field: 'remarks', headerName: 'Remarks', width: 180, headerAlign: 'center', editable: true },
-    { field: 'createdBy', headerName: 'Created By', headerAlign: 'center', width: 130 },
-    {
-      field: 'createdAt', headerName: 'Created At', headerAlign: 'center', width: 100, renderCell: (params) => {
-        return moment(params.value).format('DD/MM/YYYY hh:mm a');
-      }
-    },
-    { field: 'updatedBy', headerName: 'Updated By', headerAlign: 'center', width: 100 },
-    { field: 'updatedAt', headerName: 'Updated At', headerAlign: 'center', width: 130, renderCell: (params) => { return moment(params.value).format('DD/MM/YYYY hh:mm a') } },
-    { field: 'tallyStatus', headerName: 'Tally Status', headerAlign: 'center', width: 130, editable: true },
-  ];
-
-const [totalrows,settotalrows]=useState(0) 
   const fetchBills = async (checkfilter) => {
     setLoading(true);
     let payload;
-    if(checkfilter)
-    {
+    if (checkfilter) {
       payload = {
         ...{
           salespersonNames: [],
@@ -568,39 +1109,40 @@ const [totalrows,settotalrows]=useState(0)
           brandNames: [],
           days: [],
         }, ...{ page: paginationModel.page, size: paginationModel.pageSize }
-      }
-      console.log(payload, "payload");
-      
-    }
-    else{
+      };
+    } else {
       payload = {
         ...filterData, ...{ page: paginationModel.page, size: paginationModel.pageSize }
-      }
-      console.log(payload, "payload");
-
+      };
     }
-   
 
-    try {
-      const response = await axios.post(
-        `http://localhost:8081/api/bill`,
-        payload
-      );
-      settotalrows(response.data.pagination.totalItems)
-      const billsData = response.data.Bills.map((bill, index) => ({
-        id: index,  // Assign an ID for each row
-        ...bill,
-      }));
+    
+  try {
+    const response = await axios.post(
+      `http://localhost:8081/api/bill`,
+      payload,
+      { withCredentials: true }
+    );
 
-
-
-      setRows(billsData);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching bills:', error);
-      setLoading(false);
-    }
-  };
+    // Process and set rows
+   // In fetchBills function, change:
+const billsData = response.data.Bills.map((bill) => ({
+  id: bill.invoiceId,  // Use actual invoice ID as row ID
+  ...bill,
+}));
+    
+    setRows(billsData);
+    settotalrows(response.data.pagination.totalItems);
+    
+    // Return the processed data
+    return billsData;
+  } catch (error) {
+    console.error('Error fetching bills:', error);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchFilterData = async () => {
     setLoading(true);
@@ -611,18 +1153,20 @@ const [totalrows,settotalrows]=useState(0)
     } catch (error) {
       console.error('Error fetching bills:', error);
       setLoading(false);
+      handleApiError(error)
     }
   }
+
 
   const fetchQuery = async () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:8081/api/bill/search', {
-        params: { query: searchQuery },  // Corrected 'query' instead of 'searchQuery'
+        params: { query: searchQuery },
       });
 
       setRows(response.data.Bills.map((bill, index) => ({
-        id: index,  // Assign an ID for each row
+        id: index,
         ...bill,
       })));
     } catch (error) {
@@ -633,554 +1177,385 @@ const [totalrows,settotalrows]=useState(0)
   };
 
   useEffect(() => {
-
     if (debounceTimeout) {
-      clearTimeout(debounceTimeout)
+      clearTimeout(debounceTimeout);
     }
 
     if (searchQuery.trim().length === 4) {
       let timer = setTimeout(() => {
-        fetchQuery()
+        fetchQuery();
       }, 1000);
-      setDebounceTimeout(timer)
+      setDebounceTimeout(timer);
     }
 
-    return () => clearTimeout(debounceTimeout)
-  }, [searchQuery])
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
 
   useEffect(() => {
-    fetchFilterData()
+    fetchFilterData();
   }, []);
 
   useEffect(() => {
-    fetchBills(); // Initial data fetch
-  }, [paginationModel]); // Dependency array keeps it responsive to pagination changes
+    fetchBills();
+  }, [paginationModel]);
 
-
-  const handleCelleditCommit = (newRow, oldRow) => {
-    const updatedFields = {};
-    Object.keys(newRow).forEach((field) => {
-      if (newRow[field] !== oldRow[field]) {
-        updatedFields[field] = newRow[field];
-      }
-    });
-
-    const save = _.cloneDeep(savePayload)
-    if (newRow.invoiceId in save) {
-      save[newRow.invoiceId] = { ...save[newRow.invoiceId], ...updatedFields }
-    }
-    else {
-      save[newRow.invoiceId] = updatedFields
-    }
-    setSavePayload(save)
-
-    setRows((prevRows) =>
-      prevRows.map((row) => (row.id === newRow.id ? newRow : row))
-    );
-    return newRow;
-  }
-
-  const saveCall = async() => {
-    setLoading(true)
-    const payload = []
-    rowSelectionModel.map((id) => {
-      let invoiceId = rows[id]?.invoiceId
-
-      payload.push({ ...savePayload[invoiceId], invoiceId })
-    })
-
-    console.log(payload);
-
-
-    try {
-
-      const response = await axios.post("http://localhost:8081/api/bill/update", payload, {
-
-        headers: {
-
-          'Content-Type': 'application/json',
-
-        },
-
-        withCredentials: true,
-
-      });
-
-   
-
-      toast.info("Saved successfully");
-
-      fetchBills(); // Refresh the bill list
-
-      setSavePayload({});
-
-      setRowSelectionModel([]);
-
-    } catch (error) {
-
-      toast.error(error.response?.data || "Something went wrong while saving");
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-   
-
-
-  }
-  console.log(rows);
-  console.log(savePayload);
-
-
-  const handleChequeAdd = () => {
-
-    if (!validateChequeForm()) {
-      toast.error("Fill mandatory fields")
+ 
+  const saveCall = async () => {
+    const username = sessionStorage.getItem("user"); // Get current user
+    const payload = Object.entries(savePayload).map(([invoiceId, fields]) => ({
+      invoiceId,
+      ...fields,
+      updatedBy: username, // Add updatedBy with current user
+    }));
+  
+    if (payload.length === 0) {
+      message.info("No changes to save");
       return;
     }
-    let rowObj = _.cloneDeep(rows)
-    rowObj[chequeEdit].chequeHistory.push(chequeData)
-    setRows(rowObj)
-    let invoiceId = rowObj[chequeEdit].invoiceId
-    const save = _.cloneDeep(savePayload)
-    if (invoiceId in save) {
-      save[invoiceId] = { ...save[invoiceId], cheques: rowObj[chequeEdit].chequeHistory }
-    }
-    else {
-
-      save[invoiceId] = { ...save[invoiceId], cheques: rowObj[chequeEdit].chequeHistory }
-    }
-    setSavePayload(save)
-
-    setChequeData({
-      bankName: "",
-      chequeNumber: "",
-      chequeDate: "",
-      chequeAmount: "",
-      isCleared: false,
-      isBounced: false,
-      bounceAmt: 0
-    })
-
-  }
-
-  const handleCheque = (e) => {
-    setChequeData({ ...chequeData, [e.target.id]: e.target.value })
-  }
-
-  const handleChequeChange = (e, invoiceId, index) => {
-    let chequeArray = _.cloneDeep(rows[chequeEdit].chequeHistory)
-
-    if (e.target.id === "isCleared") {
-      chequeArray[index].isCleared = e.target.checked
-    }
-    else if (e.target.id === "isBounced") {
-      chequeArray[index].isBounced = e.target.checked
-    }
-    else if (e.target.id === "bounceAmt") {
-      chequeArray[index].bounceAmt = parseInt(e.target.value)
-    }
-
-    let rowObj = _.cloneDeep(rows)
-
-    rowObj[chequeEdit].chequeHistory = chequeArray;
-    setRows(rowObj)
-    const save = _.cloneDeep(savePayload)
-    if (rowObj[chequeEdit].invoiceId in save) {
-      save[rowObj[chequeEdit].invoiceId] = { ...save[rowObj[chequeEdit].invoiceId], cheques: chequeArray }
-    }
-    else {
-
-      save[rowObj[chequeEdit].invoiceId] = { ...save[rowObj[chequeEdit].invoiceId], cheques: chequeArray }
-    }
-    setSavePayload(save)
-
-  }
-
-  const getRowBgColor = (row) => {
-    if (row.isBounced) {
-      return 'table-danger'; // light red
-    }
-    else if (row.isCleared) {
-      return "table-success"; // light green
-    }
-    else {
-      return "table-primary"; // violet
+  
+    try {
+      await axios.post("http://localhost:8081/api/bill/update", payload, {
+        withCredentials: true,
+      });
+      message.success("Saved successfully");
+      await fetchBills();
+      setSavePayload({});
+    } catch (error) {
+      message.error("Error saving changes");
+      console.error('Save error:', error);
     }
   };
+
+ 
+
+  
+
+  
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
 
     if (value.trim().length === 0) {
-      fetchBills(); // Return to main records when search is cleared
+      fetchBills();
       return;
     }
   };
 
-  const handleFilterSelectChange = (selectedOptions, { name }) => {
+  const handleFilterSelectChange = (value, name) => {
     setFilterData((prevState) => ({
       ...prevState,
-      [name]: selectedOptions ? selectedOptions.map((option) => option.value) : [], // Store the selected options as an array
+      [name]: value, // Update the specific filter field
     }));
   };
 
-  const deletecall =()=>{
-    let payload=rowSelectionModel.map((item)=>rows[item].invoiceId)
-    deleteBillApi(payload)
-    setDeleteAll(false)
-  }
-
-  console.log(filterData, "Filter");
-  console.log(rowSelectionModel,"rwoselec");
-  
-  const clearFilter=()=>{
+  const clearFilter = () => {
     setFilterData({
       salespersonNames: [],
       retailerNames: [],
       beats: [],
       brandNames: [],
       days: [],
-    })
-    fetchBills(true)
-    toggleFilter()
-  }
+    });
+    fetchBills(true);
+    toggleFilter();
+  };
+
+  const isFormValid = useMemo(() => validateChequeForm(), [chequeData]);
+  
+
+ 
 
 
+
+  
+
+  const renderFilterModal = () => (
+    <Modal
+      title="Filter Bills"
+      visible={filterModal}
+      onCancel={toggleFilter}
+      footer={[
+        <Button key="clear" onClick={clearFilter}>
+          Clear Filters
+        </Button>,
+        <Button key="apply" type="primary" onClick={() => { fetchBills(); toggleFilter(); }}>
+          Apply Filters
+        </Button>,
+      ]}
+      width={800} // Increase modal width
+    >
+      <Row gutter={[16, 24]}> {/* Increase vertical spacing between rows */}
+        <Col span={24}>
+          <label style={{ fontSize: '16px', fontWeight: '500' }}>Salesperson Names</label>
+          <Select
+            mode="multiple"
+            placeholder="Select Salesperson"
+            value={filterData.salespersonNames}
+            onChange={(value) => handleFilterSelectChange(value, 'salespersonNames')} // Pass name directly
+            options={filterConst.salespersonNames.map((name) => ({ label: name, value: name }))}
+            style={{ width: '100%', fontSize: '14px' }} // Full width and larger font size
+            dropdownStyle={{ fontSize: '14px' }} // Larger font size in dropdown
+          />
+        </Col>
+        <Col span={24}>
+          <label style={{ fontSize: '16px', fontWeight: '500' }}>Retailer Names</label>
+          <Select
+            mode="multiple"
+            placeholder="Select Retailer"
+            value={filterData.retailerNames}
+            onChange={(value) => handleFilterSelectChange(value, 'retailerNames')} // Pass name directly
+            options={filterConst.retailerNames.map((name) => ({ label: name, value: name }))}
+            style={{ width: '100%', fontSize: '14px' }} // Full width and larger font size
+            dropdownStyle={{ fontSize: '14px' }} // Larger font size in dropdown
+          />
+        </Col>
+        <Col span={24}>
+          <label style={{ fontSize: '16px', fontWeight: '500' }}>Beats</label>
+          <Select
+            mode="multiple"
+            placeholder="Select Beat"
+            value={filterData.beats}
+            onChange={(value) => handleFilterSelectChange(value, 'beats')} // Pass name directly
+            options={filterConst.beats.map((beat) => ({ label: beat, value: beat }))}
+            style={{ width: '100%', fontSize: '14px' }} // Full width and larger font size
+            dropdownStyle={{ fontSize: '14px' }} // Larger font size in dropdown
+          />
+        </Col>
+        <Col span={24}>
+          <label style={{ fontSize: '16px', fontWeight: '500' }}>Brand Names</label>
+          <Select
+            mode="multiple"
+            placeholder="Select Brand"
+            value={filterData.brandNames}
+            onChange={(value) => handleFilterSelectChange(value, 'brandNames')} // Pass name directly
+            options={filterConst.brandNames.map((brand) => ({ label: brand, value: brand }))}
+            style={{ width: '100%', fontSize: '14px' }} // Full width and larger font size
+            dropdownStyle={{ fontSize: '14px' }} // Larger font size in dropdown
+          />
+        </Col>
+        <Col span={24}>
+          <label style={{ fontSize: '16px', fontWeight: '500' }}>Days</label>
+          <Select
+            mode="multiple"
+            placeholder="Select Day"
+            value={filterData.days}
+            onChange={(value) => handleFilterSelectChange(value, 'days')} // Pass name directly
+            options={days.map((day) => ({ label: day, value: day }))}
+            style={{ width: '100%', fontSize: '14px' }} // Full width and larger font size
+            dropdownStyle={{ fontSize: '14px' }} // Larger font size in dropdown
+          />
+        </Col>
+      </Row>
+    </Modal>
+  );
   return (
-
-
     <>
+   <Modal
+  title="Edit Bill"
+  visible={modal}
+  onCancel={toggle}
+  footer={[
+    <Button key="cancel" onClick={toggle}>
+      Cancel
+    </Button>,
+    <Button key="save" type="primary" onClick={saveEdit}>
+      Save Changes
+    </Button>
+  ]}
+  width={800} // Increased width
+  styles={{ body: { padding: '24px' }}}  // Changed to styles.body
+  destroyOnClose
+>
+  <div className="space-y-6">
+    <Row gutter={24}>
+      <Col span={12}>
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Invoice Details</h3>
+          <Descriptions column={1}>
+            <Descriptions.Item label="Invoice ID">{editData.invoiceId}</Descriptions.Item>
+            <Descriptions.Item label="Current Balance" className="font-bold">
+              ₹{editData.balance}
+            </Descriptions.Item>
+          </Descriptions>
+          
+        </div>
+      </Col>
+    </Row>
+
+    <Divider orientation="left" className="text-lg font-semibold">Add New Payment</Divider>
+
+    <Row gutter={24}>
+      <Col span={8}>
+        <Input
+          type="number"
+          id="receivedAmount"
+          placeholder="Received Amount"
+          value={addBill.receivedAmount}
+          onChange={handleAddbill}
+          status={errors.receivedAmount ? 'error' : ''}
+          style={{ width: '100%' }}
+          prefix="₹"
+        />
+      </Col>
+      <Col span={8}>
+      <DatePicker
+  id="date"
+  onChange={(date, dateString) => setAddbill(prev => ({
+    ...prev, 
+    date: dateString
+  }))}
+  status={errors.date ? 'error' : ''}
+  style={{ width: '100%' }}
+  format="DD/MM/YYYY"
+/>
+      </Col>
+      <Col span={8}>
+      <Select
+  placeholder="Payment Method"
+  value={paymentMethod}
+  onChange={handlePaymentMethod}
+  options={[
+    { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
+    { value: 'DAMAGE', label: 'Damage' },
+    { value: 'CLAIM', label: 'Claim' },
+    { value: 'CREDIT_NOTE', label: 'Credit Note' },
+    { value: 'GPAY', label: 'GPay' },
+    { value: 'CASH', label: 'Cash' },
+    { value: 'DELIVERY_PERSON', label: 'Delivery Person' },
+  ]}
+  status={errors.paymentMethod ? 'error' : ''}
+  style={{ width: '100%' }}
+/>
+      </Col>
+    </Row>
+
+    <Row gutter={24}>
+      <Col span={24}>
+        <TextArea
+          id="comments"
+          placeholder="Comments"
+          value={addBill.comments}
+          onChange={handleAddbill}
+          autoSize={{ minRows: 2, maxRows: 4 }}
+          style={{ width: '100%' }}
+        />
+      </Col>
+    </Row>
+
+    <Row justify="end">
+      <Col>
+        <Button 
+          type="primary" 
+          onClick={handleAddClick}
+          icon={<PlusOutlined />}
+          style={{ marginTop: '16px' }}
+        >
+          Add Payment
+        </Button>
+      </Col>
+    </Row>
+
+    <Divider orientation="left" className="text-lg font-semibold">Payment History</Divider>
+
+    <Table
+  dataSource={BillsHistory.filter(bill => 
+    // Filter out any entries that might be cheque entries
+    !bill.hasOwnProperty('chequeNumber') && 
+    !bill.hasOwnProperty('bankName')
+  )}
+  columns={[
+    { title: 'Date', dataIndex: 'date', render: (text) => moment(text).format('DD/MM/YYYY'), width: 120 },
+    { title: 'Amount', dataIndex: 'receivedAmount', width: 120, render: (value) => `₹${value}` },
+    { title: 'Method', dataIndex: 'paymentMethod', width: 120 },
+    { title: 'Comments', dataIndex: 'comments', ellipsis: true },
+    { title: 'Created By', dataIndex: 'createdBy', width: 150 }
+  ]}
+  pagination={false}
+  scroll={{ y: 300 }}
+  size="middle"
+  bordered
+/>
+
+  </div>
+</Modal>
       {loading ? (
         <Loader />
       ) : (
         <>
-          <Header />
+         <Header />
           <div className="flex justify-between my-4 mr-10">
             <div className="flex space-x-2 mx-6">
-              <div className="bg-white border rounded-lg border-gray-300">
-                <IconButton aria-label="filter" onClick={toggleFilter}>
-                  <FilterAltIcon />
-                </IconButton>
-              </div>
-              <div className="flex space-x-1 bg-white border rounded-lg border-gray-300">
-                <SearchIcon className="m-2" />
-                <input
-                  className="h-full focus:outline-none"
-                  maxLength={4}
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}  // Added this line
-                  onChange={handleSearchChange}
-                />
-              </div>
+              <Button icon={<FilterOutlined />} onClick={toggleFilter} className="bg-white border border-gray-300 rounded-lg" />
+              <Input
+                placeholder="Search..."
+                prefix={<SearchOutlined />}
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-48"
+              />
             </div>
             <div className="flex space-x-2 mx-6">
-              {rowSelectionModel.length?
-                <button className="bg-red-500 text-white px-4 rounded hover:shadow-xl" onClick={()=>{setDeleteAll(true); setOpenDialog(true);}}>
-                <DeleteIcon/> Delete
-                </button>:null
-              }
-              <button className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" onClick={saveCall}>
-                <SaveIcon /> Save
-              </button>
-              <button 
-  className="bg-blue-500 text-white px-4 rounded hover:shadow-xl" 
-  onClick={toggleExport}
->
-  <FileDownloadIcon /> Export
-</button>
-
-<ExportModal isOpen={exportModal} toggle={toggleExport} />
-
+              {rowSelectionModel.length > 0 && (
+               <Button type="primary" danger icon={<DeleteOutlined />} onClick={handleBulkDelete}>
+               Delete
+             </Button>
+              )}
+              <Button type="primary" icon={<SaveOutlined />} onClick={saveCall}>
+                Save
+              </Button>
+              <Button type="primary" icon={<DownloadOutlined />} onClick={toggleExport}>
+                Export
+              </Button>
+              <ExportModal isOpen={exportModal} toggle={toggleExport} />
             </div>
           </div>
-          <div className="m-4 bg-white">
-            <Box sx={{ height: '77vh', width: '100%' }}>
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                loading={loading}
-                rowCount={totalrows}
-                pageSizeOptions={[5, 10, 50]}
-                paginationModel={paginationModel}
-                paginationMode="server"
-                onPaginationModelChange={setPaginationModel}
-                disableRowSelectionOnClick
-                processRowUpdate={handleCelleditCommit}
-                disableAutoFocus={true}
-                keepNonExistentRowsSelected={true}
-                checkboxSelection={true}
-                onRowSelectionModelChange={(newRowSelectionModel) => {
-                  setRowSelectionModel(newRowSelectionModel);
-                }}
-                rowSelectionModel={rowSelectionModel}
-                editMode='cell'
-                getRowClassName={(params) => {
-                  if (params.row.deliveryStatus === "Pending") {
-                    return 'bg-lightRed';
-                  } else if (params.row.deliveryStatus === "Partially Delivered") {
-                    return 'bg-yellowCustom';
-                  } else if (params.row.deliveryStatus === "Delivered") {
-                    return 'bg-lightGreen';
-                  } else {
-                    return 'bg-violetCustom';
-                  }
-                }}
-              />
-            </Box>
+          <div className="m-4 bg-white rounded-lg shadow table-container">
+            <Table
+             components={components}
+              columns={getResizableColumns()}
+              dataSource={rows}
+              loading={loading}
+              pagination={{
+                current: paginationModel.page,
+                pageSize: paginationModel.pageSize,
+                total: totalrows,
+                onChange: (page, pageSize) => setPaginationModel({ page, pageSize }),
+              }}
+              rowSelection={{
+                selectedRowKeys: rowSelectionModel,
+                onChange: (newRowSelectionModel) => setRowSelectionModel(newRowSelectionModel),
+              }}
+              rowClassName={getRowClassName}
+              rowKey="id"
+              scroll={{ x: 2000, y: 500 }} // Enable horizontal and vertical scrolling
+              size="small" // Make the table more compact
+              onRow={(record) => ({
+              
+              })
+            }
+            />
           </div>
-          {/* Modal for edit functionality */}
-          <Modal isOpen={modal} toggle={toggle} centered={true} size="xl">
-            <ModalHeader toggle={toggle}>{editData.billno}</ModalHeader>
-            <ModalBody >
-              <div className="m-2 p-2" >
-                <Row>
-                  {/* Modal content for editing */}
-                  <Col>
-                    <Label>Date *</Label>
-                    <Input id='date' value={addBill.date} type="date" onChange={handleAddbill} invalid={!!errors.date} />
-                    {errors.date && <FormFeedback>{errors.date}</FormFeedback>}
-                  </Col>
-                  <Col>
-                    <Label>Comments</Label>
-                    <Input id='comments' type="textarea" value={addBill.comments} onChange={handleAddbill} />
-                  </Col>
-                  <Col>
-                    <Label>Payment Method *</Label>
-                    <Select
-                      options={[
-                        { value: 'CHEQUE', label: 'Cheque' },
-                        { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
-                        { value: 'DAMAGE', label: 'Damage' },
-                        { value: 'CLAIM', label: 'Claim' },
-                        { value: 'CREDIT_NOTE', label: 'Credit Note' },
-                        { value: 'GPAY', label: 'Gpay' },
-                        { value: 'CASH', label: 'Cash' },
-                        { value: 'DELIVERY_PERSON', label: 'Delivery Person' },
-                      ]}
-                      onChange={handlePaymentMethod}
-                    />
-                    {errors.paymentMethod && <FormFeedback>{errors.paymentMethod}</FormFeedback>}
-                  </Col>
-                  <Col>
-                    <Label>Amount *</Label>
-                    <Input id='receivedAmount' value={addBill.receivedAmount} type="number" min="1" onChange={handleAddbill} invalid={!!errors.receivedAmount} />
-                    {errors.receivedAmount && <FormFeedback>{errors.receivedAmount}</FormFeedback>}
-                  </Col>
-                  <Col>
-                    <Button color="primary" onClick={handleAddClick}>Add</Button>
-                  </Col>
-                </Row>
-              </div>
-              <div className="m-2 p-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <Table bordered hover responsive striped>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Payment Method</th>
-                      <th>Received Amount</th>
-                      <th>Comments</th>
-                      <th>Created by</th>
-                      <th>Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {BillsHistory &&
-                      BillsHistory.map((item, idx) => (
-                        <tr key={idx}>
-                          <td>{moment(item.date).format("DD/MM/YYYY")}</td>
-                          <td>{item.paymentMethod}</td>
-                          <td>{item.receivedAmount}</td>
-                          <td>{item.comments}</td>
-                          <td>{item.createdBy}</td>
-                          <td>{moment(item.createdAt).format('DD/MM/YYYY hh:mm a')}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </Table>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" onClick={saveEdit}>Save</Button>
-              <Button onClick={toggle}>Cancel</Button>
-            </ModalFooter>
-          </Modal>
-          <Modal isOpen={filterModal} toggle={toggleFilter} centered={true} size="xl">
-            <ModalHeader toggle={toggleFilter}>Filter</ModalHeader>
-            <ModalBody>
-              <div className="m-2 p-2">
-                <Row>
-                  <Label>Salesperson Name</Label>
-                  <Select
-                    options={filterConst.salespersonNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                    isMulti
-                    isSearchable
-                    name="salespersonNames"
-                    onChange={handleFilterSelectChange}
-                    value={filterData.salespersonNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                  />
-                </Row>
-                <Row>
-                  <Label>Retailer Name</Label>
-                  <Select
-                    options={filterConst.retailerNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                    isSearchable
-                    isMulti
-                    onChange={handleFilterSelectChange}
-                    name="retailerNames"
-                    value={filterData.retailerNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                  />
-                </Row>
-                <Row>
-                  <Label>Beats</Label>
-                  <Select
-                    options={filterConst.beats.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                    isSearchable
-                    isMulti
-                    onChange={handleFilterSelectChange}
-                    name='beats'
-                    value={filterData.beats.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                  />
-                </Row>
-                <Row>
-                  <Label>Brand name</Label>
-                  <Select
-                    options={filterConst.brandNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                    isSearchable
-                    isMulti
-                    onChange={handleFilterSelectChange}
-                    name="brandNames"
-                    value={filterData.brandNames.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                  />
-                </Row>
-                <Row>
-                  <Label>Day</Label>
-                  <Select
-                    options={days.map((item) => ({ label: item, value: item }))}
-                    isMulti
-                    onChange={handleFilterSelectChange}
-                    name='days'
-                    value={filterData.days.map((name) => {
-                      return { label: name, value: name }
-                    })}
-                  />
-                </Row>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" onClick={() => { fetchBills(); toggleFilter(); }}>Filter</Button>
-              <Button onClick={clearFilter}>Clear</Button>
-              <Button onClick={toggleFilter}>Cancel</Button>
-            </ModalFooter>
-          </Modal>
-
-          <Modal isOpen={chequeModal} toggle={toggleCheque} centered={true} size="xl">
-            <ModalHeader toggle={toggleCheque}>Cheque Details</ModalHeader>
-            <ModalBody>
-              <Row>
-                <Col>
-                  <Label>Bank Name</Label>
-                  <Input type='text' id='bankName' onChange={handleCheque} invalid={!!chequeErrors.bankName} />
-                  {chequeErrors.bankName && <FormFeedback>{chequeErrors.bankName}</FormFeedback>}
-                </Col>
-                <Col>
-                  <Label>Cheque Number</Label>
-                  <Input type='text' id="chequeNumber" onChange={handleCheque} invalid={!!chequeErrors.chequeNumber} />
-                  {chequeErrors.chequeNumber && <FormFeedback>{chequeErrors.chequeNumber}</FormFeedback>}
-                </Col>
-                <Col>
-                  <Label>Cheque Date</Label>
-                  <Input type='date' id='chequeDate' onChange={handleCheque} invalid={!!chequeErrors.chequeDate} />
-                  {chequeErrors.chequeDate && <FormFeedback>{chequeErrors.chequeDate}</FormFeedback>}
-                </Col>
-                <Col>
-                  <Label>Amount</Label>
-                  <Input type='number' id="chequeAmount" onChange={handleCheque} invalid={!!chequeErrors.chequeAmount} />
-                  {chequeErrors.chequeAmount && <FormFeedback>{chequeErrors.chequeAmount}</FormFeedback>}
-                </Col>
-                <Col>
-                  <Button color="primary" onClick={handleChequeAdd}>Add</Button>
-                </Col>
-              </Row>
-              <div className="m-2 p-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <Table bordered hover responsive >
-                  <thead>
-                    <tr>
-                      <th>Bank Name</th>
-                      <th>Cheque Number</th>
-                      <th>Cheque Date</th>
-                      <th>Amount</th>
-                      <th>Cleared</th>
-                      <th>Bounced</th>
-                      <th>Bounced Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows[chequeEdit]?.chequeHistory ?
-                      rows[chequeEdit].chequeHistory.map((item, index) => (
-                        <tr key={item.chequeId} className={getRowBgColor(item)}>
-                          <td>{item.bankName}</td>
-                          <td>{item.chequeNumber}</td>
-                          <td>{moment(item.chequeDate).format("DD/MM/YYYY")}</td>
-                          <td>{item.chequeAmount}</td>
-                          <td><input type='checkbox' id="isCleared" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isBounced} checked={item.isCleared} /></td>
-                          <td><input type='checkbox' id="isBounced" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isCleared} checked={item.isBounced} /></td>
-                          <td><input type='number' id="bounceAmt" onChange={(e) => handleChequeChange(e, item.chequeId, index)} disabled={item.isCleared || !item.isBounced} value={item.bounceAmt} /></td>
-                        </tr>
-                      )) : null}
-                  </tbody>
-                </Table>
-              </div>
-
-            </ModalBody>
-            <ModalFooter>
-              <Button onClick={toggleCheque}>Back</Button>
-            </ModalFooter>
-          </Modal>
-          <Dialog
-        open={openDialog}    // Controls whether the dialog is open or closed
-        onClose={handleDialogClose}  // Close the dialog when clicking outside or pressing Escape
-      >
-        <DialogTitle>Confirm Deletion</DialogTitle>   {/* Dialog title */}
-
-        <DialogContent>   {/* Main content of the dialog */}
-          <DialogContentText>
-           Are you sure you want to delete the { deleteAll ? "selected bills" :selectedRowId.billNo }?
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>   {/* Action buttons at the bottom of the dialog */}
-          <MyButton onClick={handleDialogClose} color="primary">
-            Cancel
-          </MyButton>
-          <MyButton onClick={handleDialogConfirm} color="primary">
-            Delete
-          </MyButton>
-        </DialogActions>
-      </Dialog>
-
-
-
+          <ChequeModal />
+          {renderFilterModal()}
+          {/* Delete Confirmation Modal */}
+<Modal
+  title="Confirm Deletion"
+  open={deleteModalVisible}
+  onCancel={handleDialogClose}
+  footer={[
+    <Button key="cancel" onClick={handleDialogClose}>
+      Cancel
+    </Button>,
+    <Button key="delete" type="primary" danger onClick={handleDialogConfirm}>
+      Delete
+    </Button>
+  ]}
+>
+  <p>
+    Are you sure you want to delete {deleteAll ? "the selected bills" : `bill number ${selectedRowId.billNo}`}?
+  </p>
+</Modal>
         </>
       )}
     </>
