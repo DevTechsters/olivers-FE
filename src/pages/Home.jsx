@@ -13,6 +13,8 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import Header from '../components/Header';
+
+
 import Loader from '../components/Loader';
 import ExportModal from './Export';
 import 'react-resizable/css/styles.css';
@@ -764,6 +766,7 @@ export default function Home() {
               rowClassName={getRowClassName}
               rowKey="id"
               scroll={{ x: 2000, y: 500 }} // Enable horizontal and vertical scrolling
+              virtual={rows.length > 100}
               size="small" // Make the table more compact
               onRow={(record) => ({
                 // Empty onRow handler

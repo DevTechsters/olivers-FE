@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Modal, Button, Descriptions, Divider, Input, DatePicker, Select, Table, Row, Col } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Descriptions, Divider, Input, DatePicker, Select, Table, Row, Col, Form, Typography, Tag, Tooltip, message } from 'antd';
+import { PlusOutlined, DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 const { TextArea } = Input;
+const { Title, Text } = Typography;
 
 const EditModal = ({
   isOpen,
@@ -18,7 +19,20 @@ const EditModal = ({
   onAddBillChange,
   onPaymentMethodChange,
 }) => {
+  const [form] = Form.useForm();
   const [localAddBill, setLocalAddBill] = useState(addBill);
+  
+  // Reset form when modal opens with new data
+  useEffect(() => {
+    if (isOpen) {
+      form.setFieldsValue({
+        receivedAmount: addBill.receivedAmount,
+        date: addBill.date ? moment(addBill.date, 'DD/MM/YYYY') : null,
+        comments: addBill.comments
+      });
+      setLocalAddBill(addBill);
+    }
+  }, [isOpen, addBill, form]);
 
   const handleAddBillChange = (e) => {
     const { id, value } = e.target;
@@ -30,11 +44,67 @@ const EditModal = ({
     setLocalAddBill(prev => ({ ...prev, date: dateString }));
     onAddBillChange({ target: { id: 'date', value: dateString } });
   };
+  
+  const getPaymentMethodColor = (method) => {
+    const colors = {
+      'CASH_DISCOUNT': 'gold',
+      'DAMAGE': 'volcano',
+      'CLAIM': 'orange',
+      'CREDIT_NOTE': 'geekblue',
+      'GPAY': 'green',
+      'CASH': 'cyan',
+      'DELIVERY_PERSON': 'purple'
+    };
+    return colors[method] || 'default';
+  };
+  
+  const handleAddPaymentClick = () => {
+    form.validateFields().then(() => {
+      onAddPayment();
+      message.success('Payment added successfully');
+      form.resetFields();
+    }).catch(err => {
+      console.log('Validation failed:', err);
+    });
+  };
+
+  // Helper function to extract username from "username":xxx format
+  const extractUsername = (createdByField) => {
+    if (!createdByField) return '';
+    
+    // Try to parse if it's a string in JSON format
+    if (typeof createdByField === 'string') {
+      try {
+        // Check if it matches the pattern "username":xxx
+        const match = createdByField.match(/"username":\s*"([^"]+)"/);
+        if (match && match[1]) {
+          return match[1];
+        }
+        
+        // Try parsing as JSON if it's a complete JSON object
+        const parsed = JSON.parse(createdByField);
+        if (parsed && parsed.username) {
+          return parsed.username;
+        }
+      } catch (e) {
+        // If parsing fails, return the original string
+        return createdByField;
+      }
+    }
+    
+    // If it's already an object with username property
+    if (typeof createdByField === 'object' && createdByField.username) {
+      return createdByField.username;
+    }
+    
+    // Fallback to the original value
+    return String(createdByField);
+  };
 
   return (
     <Modal
-      title="Edit Bill"
-      visible={isOpen}
+      title={<Title level={4}><span style={{ color: '#1890ff' }}>Edit Bill</span></Title>}
+      open={isOpen}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
@@ -44,78 +114,120 @@ const EditModal = ({
           Save Changes
         </Button>
       ]}
-      width={800}
+      width={720}
       destroyOnClose
+      bodyStyle={{ padding: '16px 24px', maxHeight: '70vh', overflowY: 'auto' }}
     >
-      <div className="space-y-6">
-        <Row gutter={24}>
+      <Form form={form} layout="vertical">
+        <Row gutter={[16, 0]}>
           <Col span={12}>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Invoice Details</h3>
-              <Descriptions column={1}>
-                <Descriptions.Item label="Invoice ID">{editData.invoiceId}</Descriptions.Item>
-                <Descriptions.Item label="Current Balance" className="font-bold">
+            <Descriptions 
+              size="small" 
+              column={1} 
+              bordered 
+              title={<Text strong>Invoice Summary</Text>}
+              style={{ backgroundColor: '#f5f5f5', borderRadius: '8px', padding: '12px' }}
+            >
+              <Descriptions.Item 
+                label={<Text type="secondary">Invoice ID</Text>}
+                labelStyle={{ width: '120px' }}
+              >
+                {editData.invoiceId}
+              </Descriptions.Item>
+              <Descriptions.Item 
+                label={<Text type="secondary">Current Balance</Text>}
+                labelStyle={{ width: '120px' }}
+              >
+                <Text strong style={{ color: '#f5222d', fontSize: '16px' }}>
                   ₹{editData.balance}
-                </Descriptions.Item>
-              </Descriptions>
-            </div>
+                </Text>
+              </Descriptions.Item>
+            </Descriptions>
           </Col>
         </Row>
 
-        <Divider orientation="left" className="text-lg font-semibold">Add New Payment</Divider>
+        <Divider orientation="left" orientationMargin="0" style={{ margin: '16px 0 12px' }}>
+          <Text strong style={{ fontSize: '14px' }}>
+            <PlusOutlined style={{ marginRight: 8 }} />
+            Add New Payment
+          </Text>
+        </Divider>
 
-        <Row gutter={24}>
+        <Row gutter={[16, 16]}>
           <Col span={8}>
-            <Input
-              type="number"
-              id="receivedAmount"
-              placeholder="Received Amount"
-              value={localAddBill.receivedAmount}
-              onChange={handleAddBillChange}
-              status={errors.receivedAmount ? 'error' : ''}
-              style={{ width: '100%' }}
-              prefix="₹"
-            />
+            <Form.Item
+              name="receivedAmount"
+              rules={[{ required: true, message: 'Please enter amount' }]}
+              validateStatus={errors.receivedAmount ? 'error' : ''}
+              help={errors.receivedAmount}
+            >
+              <Input
+                type="number"
+                id="receivedAmount"
+                placeholder="Amount"
+                value={localAddBill.receivedAmount}
+                onChange={handleAddBillChange}
+                prefix="₹"
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
           </Col>
+          
           <Col span={8}>
-            <DatePicker
-              id="date"
-              onChange={handleDateChange}
-              status={errors.date ? 'error' : ''}
-              style={{ width: '100%' }}
-              format="DD/MM/YYYY"
-            />
+            <Form.Item
+              name="date"
+              rules={[{ required: true, message: 'Please select date' }]}
+              validateStatus={errors.date ? 'error' : ''}
+              help={errors.date}
+            >
+              <DatePicker
+                id="date"
+                onChange={handleDateChange}
+                style={{ width: '100%' }}
+                format="DD/MM/YYYY"
+                placeholder="Select date"
+              />
+            </Form.Item>
           </Col>
+          
           <Col span={8}>
-            <Select
-              placeholder="Payment Method"
-              value={paymentMethod}
-              onChange={onPaymentMethodChange}
-              options={[
-                { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
-                { value: 'DAMAGE', label: 'Damage' },
-                { value: 'CLAIM', label: 'Claim' },
-                { value: 'CREDIT_NOTE', label: 'Credit Note' },
-                { value: 'GPAY', label: 'GPay' },
-                { value: 'CASH', label: 'Cash' },
-                { value: 'DELIVERY_PERSON', label: 'Delivery Person' },
-              ]}
-              status={errors.paymentMethod ? 'error' : ''}
-              style={{ width: '100%' }}
-            />
+            <Form.Item
+              name="paymentMethod"
+              rules={[{ required: true, message: 'Please select method' }]}
+              validateStatus={errors.paymentMethod ? 'error' : ''}
+              help={errors.paymentMethod}
+            >
+              <Select
+                placeholder="Payment Method"
+                value={paymentMethod}
+                onChange={onPaymentMethodChange}
+                options={[
+                  { value: 'CASH_DISCOUNT', label: 'Cash Discount' },
+                  { value: 'DAMAGE', label: 'Damage' },
+                  { value: 'CLAIM', label: 'Claim' },
+                  { value: 'CREDIT_NOTE', label: 'Credit Note' },
+                  { value: 'GPAY', label: 'GPay' },
+                  { value: 'CASH', label: 'Cash' },
+                  { value: 'DELIVERY_PERSON', label: 'Delivery Person' },
+                ]}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={24}>
+        <Row gutter={[16, 16]}>
           <Col span={24}>
-            <TextArea
-              id="comments"
-              placeholder="Comments"
-              value={localAddBill.comments}
-              onChange={handleAddBillChange}
-              autoSize={{ minRows: 2, maxRows: 4 }}
-              style={{ width: '100%' }}
-            />
+            <Form.Item name="comments">
+              <TextArea
+                id="comments"
+                placeholder="Add comments or notes about this payment"
+                value={localAddBill.comments}
+                onChange={handleAddBillChange}
+                autoSize={{ minRows: 2, maxRows: 3 }}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
           </Col>
         </Row>
 
@@ -123,16 +235,22 @@ const EditModal = ({
           <Col>
             <Button 
               type="primary" 
-              onClick={onAddPayment}
+              onClick={handleAddPaymentClick}
               icon={<PlusOutlined />}
-              style={{ marginTop: '16px' }}
             >
               Add Payment
             </Button>
           </Col>
         </Row>
 
-        <Divider orientation="left" className="text-lg font-semibold">Payment History</Divider>
+        <Divider orientation="left" orientationMargin="0" style={{ margin: '16px 0 12px' }}>
+          <Text strong style={{ fontSize: '14px' }}>
+            Payment History
+            <Tooltip title="Shows all non-cheque payments">
+              <InfoCircleOutlined style={{ marginLeft: 8, color: '#1890ff' }} />
+            </Tooltip>
+          </Text>
+        </Divider>
 
         <Table
           dataSource={BillsHistory.filter(bill => 
@@ -140,18 +258,48 @@ const EditModal = ({
             !bill.hasOwnProperty('bankName')
           )}
           columns={[
-            { title: 'Date', dataIndex: 'date', render: (text) => moment(text).format('DD/MM/YYYY'), width: 120 },
-            { title: 'Amount', dataIndex: 'receivedAmount', width: 120, render: (value) => `₹${value}` },
-            { title: 'Method', dataIndex: 'paymentMethod', width: 120 },
-            { title: 'Comments', dataIndex: 'comments', ellipsis: true },
-            { title: 'Created By', dataIndex: 'createdBy', width: 150 }
+            { 
+              title: 'Date', 
+              dataIndex: 'date', 
+              render: (text) => moment(text).format('DD/MM/YYYY'), 
+              width: 100 
+            },
+            { 
+              title: 'Amount', 
+              dataIndex: 'receivedAmount', 
+              width: 90, 
+              render: (value) => <Text strong>₹{value}</Text> 
+            },
+            { 
+              title: 'Method', 
+              dataIndex: 'paymentMethod', 
+              width: 120,
+              render: (method) => (
+                <Tag color={getPaymentMethodColor(method)}>
+                  {method.replace(/_/g, ' ')}
+                </Tag>
+              )
+            },
+            { 
+              title: 'Comments', 
+              dataIndex: 'comments', 
+              ellipsis: true 
+            },
+            { 
+              title: 'Created By', 
+              dataIndex: 'createdBy', 
+              width: 120,
+              ellipsis: true,
+              render: (createdBy) => extractUsername(createdBy)
+            }
           ]}
           pagination={false}
-          scroll={{ y: 300 }}
-          size="middle"
+          scroll={{ y: 200 }}
+          size="small"
           bordered
+          rowKey={(record) => `${record.date}-${record.receivedAmount}`}
         />
-      </div>
+      </Form>
     </Modal>
   );
 };

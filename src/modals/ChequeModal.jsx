@@ -1,45 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Table, Input, DatePicker, Checkbox, message, Divider } from 'antd';
+import { Modal, Button, Table, Input, DatePicker, Checkbox, message, Divider, Tag, Tooltip, Space } from 'antd';
+import { EditOutlined, CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import _ from 'lodash';
 
-const ChequeModal = ({ 
-  isOpen, 
-  onClose, 
-  chequeEdit, 
-  rows, 
-  setRows, 
-  setSavePayload 
+const ChequeModal = ({
+  isOpen,
+  onClose,
+  chequeEdit,
+  rows,
+  setRows,
+  setSavePayload
 }) => {
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const [editingChequeIndex, setEditingChequeIndex] = useState(null);
   
-  const [chequeData, setChequeData] = useState({
-    bankName: "",
-    chequeNumber: "",
-    chequeDate: "",
-    chequeAmount: "",
-    isCleared: false,
-    isBounced: false,
-    bounceAmt: 0,
-  });
-
-  const [chequeErrors, setChequeErrors] = useState({});
-
   const initialChequeState = {
     bankName: "",
     chequeNumber: "",
-    chequeDate: "",
+    chequeDate: null,
     chequeAmount: "",
     isCleared: false,
     isBounced: false,
     bounceAmt: 0,
   };
+  
+  const [chequeData, setChequeData] = useState(initialChequeState);
+  const [chequeErrors, setChequeErrors] = useState({});
 
   useEffect(() => {
     if (isOpen) {
       setHasAttemptedSubmit(false);
       setChequeErrors({});
       setChequeData(initialChequeState);
+      setEditingChequeIndex(null);
     }
   }, [isOpen]);
 
@@ -70,7 +64,7 @@ const ChequeModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChequeAdd = () => {
+  const handleChequeAction = () => {
     setHasAttemptedSubmit(true);
     
     if (!validateChequeForm()) {
@@ -82,42 +76,47 @@ const ChequeModal = ({
       bankName: chequeData.bankName,
       chequeNumber: chequeData.chequeNumber,
       chequeDate: chequeData.chequeDate,
-      chequeAmount: chequeData.chequeAmount,
+      chequeAmount: parseFloat(chequeData.chequeAmount),
       isCleared: chequeData.isCleared,
       isBounced: chequeData.isBounced,
-      bounceAmt: chequeData.bounceAmt
+      bounceAmt: parseFloat(chequeData.bounceAmt || 0)
     };
 
     // Update local state
     let rowObj = _.cloneDeep(rows);
     if (chequeEdit !== undefined && rowObj[chequeEdit]) {
-      rowObj[chequeEdit].chequeHistory = [
-        ...rowObj[chequeEdit].chequeHistory || [],
-        newCheque
-      ];
+      if (editingChequeIndex !== null) {
+        // Update existing cheque
+        rowObj[chequeEdit].chequeHistory[editingChequeIndex] = newCheque;
+        message.success("Cheque updated successfully");
+      } else {
+        // Add new cheque
+        if (!rowObj[chequeEdit].chequeHistory) {
+          rowObj[chequeEdit].chequeHistory = [];
+        }
+        rowObj[chequeEdit].chequeHistory.push(newCheque);
+        message.success("Cheque added successfully");
+      }
+      
       setRows(rowObj);
 
-      // Update save payload - ONLY add the new cheque
+      // Update save payload
       const invoiceId = rowObj[chequeEdit].invoiceId;
       setSavePayload(prev => ({
         ...prev,
         [invoiceId]: {
           ...prev[invoiceId],
-          cheques: [
-            ...(prev[invoiceId]?.cheques || []),
-            newCheque
-          ]
+          cheques: rowObj[chequeEdit].chequeHistory
         }
       }));
     } else {
-      message.error("Cannot add cheque: invalid row selected");
+      message.error("Cannot process cheque: invalid row selected");
       return;
     }
 
-    // Reset form and close modal
+    // Reset form and states
     setChequeData(initialChequeState);
-    onClose();
-    message.success("Cheque added successfully");
+    setEditingChequeIndex(null);
   };
 
   const handleInputChange = (field, value) => {
@@ -134,6 +133,28 @@ const ChequeModal = ({
     }
   };
 
+  const startEdit = (cheque, index) => {
+    setChequeData({
+      bankName: cheque.bankName,
+      chequeNumber: cheque.chequeNumber,
+      chequeDate: cheque.chequeDate,
+      chequeAmount: cheque.chequeAmount.toString(),
+      isCleared: cheque.isCleared,
+      isBounced: cheque.isBounced,
+      bounceAmt: cheque.bounceAmt ? cheque.bounceAmt.toString() : "0"
+    });
+    setEditingChequeIndex(index);
+    setHasAttemptedSubmit(false);
+    setChequeErrors({});
+  };
+
+  const cancelEdit = () => {
+    setChequeData(initialChequeState);
+    setEditingChequeIndex(null);
+    setHasAttemptedSubmit(false);
+    setChequeErrors({});
+  };
+
   // Check if chequeEdit is valid and rows exists
   const hasValidChequeHistory = 
     typeof chequeEdit !== 'undefined' && 
@@ -144,27 +165,39 @@ const ChequeModal = ({
 
   return (
     <Modal
-      title="Cheque Details"
+      title={
+        <div className="flex items-center justify-between">
+          <span>Cheque Management</span>
+          {editingChequeIndex !== null && (
+            <Tag color="blue">Editing Cheque #{rows[chequeEdit]?.chequeHistory[editingChequeIndex]?.chequeNumber}</Tag>
+          )}
+        </div>
+      }
       open={isOpen}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" onClick={onClose}>
-          Cancel
+        <Button key="cancel" onClick={editingChequeIndex !== null ? cancelEdit : onClose}>
+          {editingChequeIndex !== null ? "Cancel Edit" : "Close"}
         </Button>,
-        <Button key="add" type="primary" onClick={handleChequeAdd}>
-          Add Cheque
+        <Button 
+          key="action" 
+          type="primary" 
+          onClick={handleChequeAction}
+        >
+          {editingChequeIndex !== null ? "Update Cheque" : "Add Cheque"}
         </Button>,
       ]}
-      width={1000}
+      width={900}
     >
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Cheque Form Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Add New Cheque</h3>
+        <div className="bg-gray-50 p-4 rounded-md">
+          <h3 className="text-lg font-medium mb-4">{editingChequeIndex !== null ? "Edit Cheque" : "Add New Cheque"}</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
               <Input
-                placeholder="Bank Name"
+                placeholder="Enter bank name"
                 value={chequeData.bankName}
                 onChange={e => handleInputChange('bankName', e.target.value)}
                 status={hasAttemptedSubmit && chequeErrors.bankName ? "error" : ""}
@@ -175,8 +208,9 @@ const ChequeModal = ({
             </div>
             
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cheque Number</label>
               <Input
-                placeholder="Cheque Number"
+                placeholder="Enter cheque number"
                 value={chequeData.chequeNumber}
                 onChange={e => handleInputChange('chequeNumber', e.target.value)}
                 status={hasAttemptedSubmit && chequeErrors.chequeNumber ? "error" : ""}
@@ -187,8 +221,9 @@ const ChequeModal = ({
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cheque Date</label>
               <DatePicker
-                placeholder="Cheque Date"
+                placeholder="Select date"
                 value={chequeData.chequeDate ? moment(chequeData.chequeDate) : null}
                 onChange={date => handleInputChange('chequeDate', date)}
                 status={hasAttemptedSubmit && chequeErrors.chequeDate ? "error" : ""}
@@ -200,12 +235,14 @@ const ChequeModal = ({
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cheque Amount (₹)</label>
               <Input
                 type="number"
-                placeholder="Cheque Amount"
+                placeholder="Enter amount"
                 value={chequeData.chequeAmount}
-                onChange={e => handleInputChange('chequeAmount', Number(e.target.value))}
+                onChange={e => handleInputChange('chequeAmount', e.target.value)}
                 status={hasAttemptedSubmit && chequeErrors.chequeAmount ? "error" : ""}
+                prefix="₹"
               />
               {hasAttemptedSubmit && chequeErrors.chequeAmount && (
                 <div className="text-red-500 text-sm mt-1">{chequeErrors.chequeAmount}</div>
@@ -213,8 +250,9 @@ const ChequeModal = ({
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex space-x-4">
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cheque Status</label>
+            <div className="flex flex-wrap gap-6">
               <Checkbox
                 checked={chequeData.isCleared}
                 onChange={e => {
@@ -225,7 +263,10 @@ const ChequeModal = ({
                   }
                 }}
               >
-                Cleared
+                <span className="flex items-center">
+                  <CheckCircleOutlined className="mr-1 text-green-600" />
+                  Cleared
+                </span>
               </Checkbox>
               
               <Checkbox
@@ -237,36 +278,63 @@ const ChequeModal = ({
                   }
                 }}
               >
-                Bounced
+                <span className="flex items-center">
+                  <CloseCircleOutlined className="mr-1 text-red-600" />
+                  Bounced
+                </span>
               </Checkbox>
+              
+              {!chequeData.isCleared && !chequeData.isBounced && (
+                <span className="flex items-center text-gray-500">
+                  <QuestionCircleOutlined className="mr-1 text-yellow-600" />
+                  Pending
+                </span>
+              )}
             </div>
-
-            {chequeData.isBounced && (
-              <div>
-                <Input
-                  type="number"
-                  placeholder="Bounce Amount"
-                  value={chequeData.bounceAmt}
-                  onChange={e => handleInputChange('bounceAmt', Number(e.target.value))}
-                  status={hasAttemptedSubmit && chequeErrors.bounceAmt ? "error" : ""}
-                />
-                {hasAttemptedSubmit && chequeErrors.bounceAmt && (
-                  <div className="text-red-500 text-sm mt-1">{chequeErrors.bounceAmt}</div>
-                )}
-              </div>
-            )}
           </div>
+
+          {chequeData.isBounced && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bounce Amount (₹)</label>
+              <Input
+                type="number"
+                placeholder="Enter bounce amount"
+                value={chequeData.bounceAmt}
+                onChange={e => handleInputChange('bounceAmt', e.target.value)}
+                status={hasAttemptedSubmit && chequeErrors.bounceAmt ? "error" : ""}
+                prefix="₹"
+                style={{ maxWidth: '300px' }}
+              />
+              {hasAttemptedSubmit && chequeErrors.bounceAmt && (
+                <div className="text-red-500 text-sm mt-1">{chequeErrors.bounceAmt}</div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Cheque History Section (if needed) */}
+        {/* Cheque History Section */}
         {hasValidChequeHistory && (
-          <>
-            <Divider orientation="left">Cheque History</Divider>
+          <div className="mt-6">
+            <Divider orientation="left">
+              <span className="text-gray-700">Cheque History</span>
+            </Divider>
             <Table
-              dataSource={rows[chequeEdit].chequeHistory}
+              dataSource={rows[chequeEdit].chequeHistory.map((cheque, index) => ({
+                ...cheque,
+                key: index
+              }))}
               columns={[
-                { title: 'Bank', dataIndex: 'bankName', width: 120 },
-                { title: 'Cheque No', dataIndex: 'chequeNumber', width: 120 },
+                { 
+                  title: 'Bank',
+                  dataIndex: 'bankName',
+                  width: 120,
+                  ellipsis: true
+                },
+                { 
+                  title: 'Cheque No',
+                  dataIndex: 'chequeNumber',
+                  width: 120
+                },
                 { 
                   title: 'Date', 
                   dataIndex: 'chequeDate',
@@ -277,34 +345,65 @@ const ChequeModal = ({
                   title: 'Amount', 
                   dataIndex: 'chequeAmount',
                   width: 120,
-                  render: (amount) => `₹${amount.toLocaleString()}`
+                  render: (amount) => `₹${parseFloat(amount).toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}`
                 },
                 {
                   title: 'Status',
                   width: 150,
                   render: (_, record) => (
                     <div>
-                      {record.isCleared && <span className="text-green-600">Cleared</span>}
+                      {record.isCleared && (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          Cleared
+                        </Tag>
+                      )}
                       {record.isBounced && (
                         <div>
-                          <span className="text-red-600">Bounced</span>
+                          <Tag color="error" icon={<CloseCircleOutlined />}>
+                            Bounced
+                          </Tag>
                           {record.bounceAmt > 0 && (
-                            <div className="text-sm text-gray-500">
-                              Bounce Amount: ₹{record.bounceAmt.toLocaleString()}
+                            <div className="text-sm text-gray-500 mt-1">
+                              Bounce: ₹{parseFloat(record.bounceAmt).toLocaleString('en-IN', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                              })}
                             </div>
                           )}
                         </div>
                       )}
-                      {!record.isCleared && !record.isBounced && <span className="text-yellow-600">Pending</span>}
+                      {!record.isCleared && !record.isBounced && (
+                        <Tag color="warning" icon={<QuestionCircleOutlined />}>
+                          Pending
+                        </Tag>
+                      )}
                     </div>
+                  )
+                },
+                {
+                  title: 'Action',
+                  width: 100,
+                  render: (_, record, index) => (
+                    <Tooltip title="Edit cheque">
+                      <Button
+                        type="link"
+                        icon={<EditOutlined />}
+                        onClick={() => startEdit(record, index)}
+                        disabled={editingChequeIndex !== null}
+                      />
+                    </Tooltip>
                   )
                 }
               ]}
               pagination={false}
               size="small"
               bordered
+              className="cheque-history-table"
             />
-          </>
+          </div>
         )}
       </div>
     </Modal>
