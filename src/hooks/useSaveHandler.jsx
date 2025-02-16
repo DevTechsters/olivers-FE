@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input, Select } from 'antd';
 
 const EditableCell = ({ 
@@ -11,7 +11,14 @@ const EditableCell = ({
   onSave,
   inputType = 'text'
 }) => {
-    const editable = record.id === editingKey && dataIndex === editingField;
+  const editable = record.id === editingKey && dataIndex === editingField;
+  
+  useEffect(() => {
+    // Debug log
+    if (editable) {
+      console.log('Rendering editable cell for:', record.id, dataIndex);
+    }
+  }, [editable, record.id, dataIndex]);
   
   const renderEditInput = () => {
     if (inputType === 'select') {
@@ -19,7 +26,7 @@ const EditableCell = ({
         <Select
           value={record[dataIndex]}
           onChange={(value) => onCellChange(value, record.id, dataIndex)}
-          onBlur={onSave}
+          onBlur={() => onSave()}
           style={{ width: '100%' }}
           autoFocus
         >
@@ -35,31 +42,31 @@ const EditableCell = ({
       <Input
         value={record[dataIndex]}
         onChange={(e) => onCellChange(e.target.value, record.id, dataIndex)}
-        onBlur={onSave}
-        onPressEnter={onSave}
+        onBlur={() => onSave()}
+        onPressEnter={() => onSave()}
         autoFocus
       />
     );
   };
 
   return editable ? (
-    <div className="editable-cell-value-wrapper">
+    <div className="editable-cell-value-wrapper" style={{ background: '#fffbe6', padding: '5px' }}>
       {renderEditInput()}
     </div>
   ) : (
     <div 
-    className="editable-cell-value-wrapper"
-    onClick={(e) => {
-      e.stopPropagation();
-      onCellClick(record.id, dataIndex);
-    }}
-    style={{ cursor: 'pointer' }}
-  >
-    {record[dataIndex] ?? 'Click to edit'}
-  </div>
+      className="editable-cell-value-wrapper"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCellClick(record.id, dataIndex);
+      }}
+      style={{ cursor: 'pointer', padding: '5px' }}
+    >
+      {record[dataIndex] !== undefined && record[dataIndex] !== null 
+        ? record[dataIndex] 
+        : <span style={{ color: '#ccc' }}>Click to edit</span>}
+    </div>
   );
 };
 
-
-
-export default EditableCell;
+export default React.memo(EditableCell);
