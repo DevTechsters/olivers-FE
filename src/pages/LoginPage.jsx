@@ -4,6 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/authSlice';
 import { toast } from 'react-toastify';
+import { Form, Input, Button, Card, Typography, Alert } from 'antd';
+
+const { Title, Text } = Typography;
 
 const LoginPage = () => {
   const dispatch = useDispatch();
@@ -12,83 +15,47 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     try {
-        const response = await axios.post('http://localhost:8081/api/users/signin', {
-            username,
-            password,
-        }, {
-            withCredentials: true  // Important: this allows cookies to be sent
-        });
+      const response = await axios.post('http://localhost:8081/api/users/signin', {
+        username: values.username,
+        password: values.password,
+      }, {
+        withCredentials: true
+      });
 
-        // Store in localStorage or state management
-        localStorage.setItem('username', response.data.username);
-        
-        // Update Redux state
-        dispatch(login({ username: response.data.username }));
-        
-        toast.info("Logged in successfully");
-        navigate("/home");
+      localStorage.setItem('username', response.data.username);
+      dispatch(login({ username: response.data.username }));
+      toast.success("Logged in successfully");
+      navigate("/home");
     } catch (error) {
-        if (error.response) {
-            const { message, status, path } = error.response.data || {};
-            setErrorMessage(`${message || 'Error'} (Status: ${status || 'Unknown'} at ${path || 'Unknown path'})`);
-        } else if (error.request) {
-            setErrorMessage('No response received');
-        } else {
-            setErrorMessage('Error setting up the request');
-        }
+      if (error.response) {
+        const { message, status, path } = error.response.data || {};
+        setErrorMessage(`${message || 'Error'} (Status: ${status || 'Unknown'} at ${path || 'Unknown path'})`);
+      } else if (error.request) {
+        setErrorMessage('No response received');
+      } else {
+        setErrorMessage('Error setting up the request');
+      }
     }
-};
-  
-  
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        {errorMessage && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
-            {errorMessage}
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="username">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-semibold mb-2" htmlFor="password">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Login
-          </button>
-        </form>
-        <p className='m-1 text-center'>Don't have an account? <Link to="/signup">Signup</Link></p>
-      </div>
+      <Card className="w-full max-w-md shadow-lg" bordered={false}>
+        <Title level={2} className="text-center">Login</Title>
+        {errorMessage && <Alert message={errorMessage} type="error" showIcon className="mb-4" />}
+        <Form layout="vertical" onFinish={handleSubmit}>
+          <Form.Item label="Username" name="username" rules={[{ required: true, message: 'Please enter your username' }]}> 
+            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Please enter your password' }]}> 
+            <Input.Password value={password} onChange={(e) => setPassword(e.target.value)} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" block>Login</Button>
+        </Form>
+        {/* <Text className='block text-center mt-2'>Don't have an account? <Link to="/signup">Signup</Link></Text> */}
+      </Card>
     </div>
   );
 };
