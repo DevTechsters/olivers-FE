@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, DatePicker, message, Space, Select  } from 'antd';
+import { Table, Button, Input, DatePicker, message, Space, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import '../css/auditLogs.css';
 import Header from '../components/Header';
-import moment from 'moment';
 
 const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const AuditLogs = () => {
   // States for managing audit log data and loading state
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [totalRows, setTotalRows] = useState(0);
 
-  // States for pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0); // Total number of records
+  // Pagination state
+  const [paginationModel, setPaginationModel] = useState({ page: 1, pageSize: 10 });
 
-  // Filter states (can be controlled by user input or default values)
+  // Filter states
   const [filters, setFilters] = useState({
     user: '',
     operationType: '',
@@ -27,96 +26,57 @@ const AuditLogs = () => {
     dateTo: null,
   });
 
-  // Fetch audit logs only on filter button click, not during typing
-  const fetchAuditLogs = async () => {
+  // Fetch Audit Logs Function
+  const fetchAuditLogs = async (resetPagination = false) => {
     setLoading(true);
 
-    // Prepare the filters for the API request, sending only those that are not empty
-    const requestPayload = { ...filters, page: currentPage, pageSize };
+    // Reset pagination if needed
+    const updatedPagination = resetPagination ? { page: 1, pageSize: 10 } : paginationModel;
+
+    const requestPayload = { 
+      ...filters, 
+      page: updatedPagination.page, 
+      size: updatedPagination.pageSize 
+    };
 
     try {
-      // Make a POST request to fetch the audit logs
       const response = await axios.post('http://localhost:8081/api/audit', requestPayload, { withCredentials: true });
 
-      // Set the fetched data to the state
-      setData(response.data); // Assuming `response.data.logs` contains the actual logs
-      // setTotal(response.data); // Assuming `response.data.total` contains the total number of records
+      setData(response.data.logs);
+      setTotalRows(response.data.pagination.totalItems);
+
+      // Reset pagination state only if needed
+      if (resetPagination) {
+        setPaginationModel((prev) => (prev.page !== 1 || prev.pageSize !== 10 ? { page: 1, pageSize: 10 } : prev));
+      }
+
       message.success('Audit logs fetched successfully!');
     } catch (error) {
-      // Handle errors if API call fails
       console.error('Error fetching audit logs:', error);
       message.error('Failed to fetch audit logs.');
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
+  // Handle filter input changes
   const handleFilterChange = (value, field) => {
-    setFilters({ ...filters, [field]: value });
+    setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Handle date range selection
   const handleDateChange = (dates) => {
-    if (!dates || dates.length !== 2) {
-      setFilters({
-        ...filters,
-        dateFrom: null,
-        dateTo: null,
-      });
-      return;
-    }
-  
-    const [startDate, endDate] = dates;
-    setFilters({
-      ...filters,
-      dateFrom: startDate ? startDate.format('YYYY-MM-DD') : null,
-      dateTo: endDate ? endDate.format('YYYY-MM-DD') : null,
-    });
-  
-  };
-  
-
-  const handlePaginationChange = (page, pageSize) => {
-    setCurrentPage(page);
-    setPageSize(pageSize);
+    setFilters((prev) => ({
+      ...prev,
+      dateFrom: dates?.[0]?.format('YYYY-MM-DD') || null,
+      dateTo: dates?.[1]?.format('YYYY-MM-DD') || null,
+    }));
   };
 
-  const columns = [
-    {
-      title: 'Bill Number',
-      dataIndex: 'billNumber',
-      key: 'billNumber',
-      align: 'left', // Align the text to the left
-    },
-    {
-      title: 'Operation Type',
-      dataIndex: 'operationType',
-      key: 'operationType',
-      align: 'left', // Align the text to the left
-    },
-    {
-      title: 'Modified By',
-      dataIndex: 'modifiedBy',
-      key: 'modifiedBy',
-      align: 'left', // Align the text to the left
-    },
-    {
-      title: 'Modified At',
-      dataIndex: 'modifiedAt',
-      key: 'modifiedAt',
-      align: 'left', // Align the text to the left
-      render: (text) => text
-    },
-    {
-      title: 'Details',
-      dataIndex: 'details',
-      key: 'details',
-      align: 'left', // Align the text to the left
-    },
-  ];
-
-    useEffect(() => {
-      fetchAuditLogs(); 
-    }, []); 
+  // Ensure useEffect runs only when pagination changes
+  useEffect(() => {
+    fetchAuditLogs(); 
+  }, [paginationModel]);
 
   return (
     <>
@@ -137,7 +97,6 @@ const AuditLogs = () => {
               onChange={(e) => handleFilterChange(e.target.value, 'billNo')}
               style={{ width: 200 }}
             />
-            {/* Dropdown for Operation Type */}
             <Select
               placeholder="Operation Type"
               value={filters.operationType}
@@ -157,7 +116,7 @@ const AuditLogs = () => {
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={fetchAuditLogs} // Fetch audit logs only on button click
+              onClick={() => fetchAuditLogs(true)} // Pass function reference
               style={{ marginTop: 4 }}
             >
               Filter
@@ -167,17 +126,21 @@ const AuditLogs = () => {
 
         <Table
           dataSource={data}
-          columns={columns}
+          columns={[
+            { title: 'Bill Number', dataIndex: 'billNumber', key: 'billNumber', align: 'left' },
+            { title: 'Operation Type', dataIndex: 'operationType', key: 'operationType', align: 'left' },
+            { title: 'Modified By', dataIndex: 'modifiedBy', key: 'modifiedBy', align: 'left' },
+            { title: 'Modified At', dataIndex: 'modifiedAt', key: 'modifiedAt', align: 'left' },
+            { title: 'Details', dataIndex: 'details', key: 'details', align: 'left' },
+          ]}
           loading={loading}
-          rowKey="id" // assuming 'id' is the unique key in the data
+          rowKey="id"
           pagination={{
-            current: currentPage,
-            pageSize: pageSize,
-            total: total,
-            onChange: handlePaginationChange,
-            showSizeChanger: true,
-            pageSizeOptions: ['10', '20', '50'],
-          }} // Pagination with total count and page change handler
+            current: paginationModel.page,
+            pageSize: paginationModel.pageSize,
+            total: totalRows,
+            onChange: (page, pageSize) => setPaginationModel({ page, pageSize }),
+          }}
           className="audit-table"
         />
       </div>
