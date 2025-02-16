@@ -1,47 +1,90 @@
 import React, { useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import Button from '@mui/material/Button';
+import { Upload, Button, Typography, Progress, message, Space, Card } from 'antd';
+import { UploadOutlined, DeleteOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import Header from '../components/Header';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import { handleApiError } from "../helpers/errorHandler";
+import styled from 'styled-components';
 
+const { Title, Text } = Typography;
+
+const StyledCard = styled(Card)`
+  width: 80%;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+`;
+
+const UploadContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+`;
+
+const StyledUpload = styled(Upload.Dragger)`
+  .ant-upload {
+    padding: 24px;
+  }
+  
+  &.ant-upload-drag {
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background: #fafafa;
+    transition: all 0.3s;
+  }
+  
+  &.ant-upload-drag:hover {
+    border-color: #1890ff;
+  }
+  
+  &.ant-upload-drag-uploading {
+    border-color: #1890ff;
+  }
+`;
+
+const ActionContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+`;
+
+const MessageContainer = styled.div`
+  margin-top: 16px;
+`;
 
 const FileUpload = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(null);
+  const [isUploaded, setIsUploaded] = useState(false);
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'application/vnd.ms-excel': ['.xls'],
-    },
-    onDrop: (acceptedFiles) => {
-      if (acceptedFiles.length > 0) {
-        setFile(acceptedFiles[0]);
-        setError(null);
-        toast.info(`File selected: ${acceptedFiles[0].name}`);
-      } else {
-        setError('Invalid file type. Please upload a valid Excel file.');
-      }
-    },
-  });
-
-
+  const beforeUpload = (file) => {
+    const isExcel = 
+      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+      file.type === 'application/vnd.ms-excel';
+    
+    if (!isExcel) {
+      message.error('You can only upload Excel files!');
+    } else {
+      setFile(file);
+      setIsUploaded(false);
+      message.info(`File selected: ${file.name}`);
+    }
+    
+    return false;
+  };
 
   const handleUpload = async () => {
     if (!file) {
-      setError('No file selected');
-      toast.error('No file selected');
+      message.error('No file selected');
       return;
     }
   
     setUploading(true);
-    setError(null);
     setSuccess(null);
+    setUploadProgress(0);
   
     const formData = new FormData();
     formData.append('file', file);
@@ -51,69 +94,116 @@ const FileUpload = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        withCredentials: true, // Required if session-based authentication is used
+        withCredentials: true,
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        }
       });
   
-      setSuccess('File uploaded successfully');
-      toast.success(`File uploaded successfully by ${response.data.uploadedBy}`);
+      setSuccess(`File uploaded successfully by ${response.data.uploadedBy}`);
+      setIsUploaded(true);
+      message.success(`File uploaded successfully by ${response.data.uploadedBy}`);
     } catch (err) {
-            handleApiError(err)
-      
+      handleApiError(err);
     } finally {
       setUploading(false);
     }
   };
   
-
+  const handleRemove = () => {
+    setFile(null);
+    setSuccess(null);
+    setUploadProgress(0);
+    setIsUploaded(false);
+  };
+  
   return (
     <>
       <Header title="Upload File" />
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="p-6 rounded-lg shadow-lg w-2/4 bg-white">
-          <h3 className="text-2xl font-bold m-4">Upload File</h3>
-          <div className="flex items-center justify-center">
-            <div
-              {...getRootProps({
-                className: 'dropzone',
-              })}
-              style={{
-                border: '2px dashed #cccccc',
-                borderRadius: '4px',
-                padding: '20px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                backgroundColor: '#f9f9f9',
-                width: '90%',
-              }}
-            >
-              <input {...getInputProps()} />
-              <CloudUploadIcon fontSize="large" />
-              <p>Drag & drop an Excel file here, or click to select one</p>
-              {file && <p>Selected file: {file.name}</p>}
+      <UploadContainer>
+        <StyledCard>
+          <Title level={4} style={{ textAlign: 'center', marginBottom: 24 }}>
+            Upload Your Excel File
+          </Title>
+          
+          <StyledUpload
+            name="file"
+            multiple={false}
+            showUploadList={false}
+            beforeUpload={beforeUpload}
+            fileList={file ? [file] : []}
+            className={uploading ? 'ant-upload-drag-uploading' : ''}
+          >
+            <p className="ant-upload-drag-icon">
+              {isUploaded ? <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 48 }} /> : 
+               file ? <CheckCircleOutlined style={{ color: '#1890ff', fontSize: 48 }} /> : 
+                     <UploadOutlined style={{ color: '#1890ff', fontSize: 48 }} />}
+            </p>
+            <p className="ant-upload-text">
+              {isUploaded ? 'File uploaded successfully' :
+               file ? 'File ready for upload' : 
+                     'Click or drag an Excel file to this area'}
+            </p>
+            <p className="ant-upload-hint">
+              {!file && 'Support for Excel files (.xlsx, .xls)'}
+            </p>
+          </StyledUpload>
+          
+          {file && (
+            <div style={{ marginTop: 16 }}>
+              <Card size="small" style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <Space>
+                    <Text strong>{file.name}</Text>
+                    <Text type="secondary">({(file.size / 1024).toFixed(1)} KB)</Text>
+                  </Space>
+                  <Button 
+                    type="text" 
+                    icon={<DeleteOutlined style={{ color: '#ff4d4f' }} />} 
+                    onClick={handleRemove}
+                    disabled={uploading}
+                  />
+                </div>
+              </Card>
             </div>
-          </div>
-          <div className="m-2 mt-4 flex justify-end space-x-2">
-            <Button
-              color="secondary"
-              variant="outlined"
-              onClick={() => setFile(null)}
-              disabled={uploading}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleUpload}
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading...' : 'Upload'}
-            </Button>
-          </div>
-          {error && <p className="mt-4 text-red-500">{error}</p>}
-          {success && <p className="mt-4 text-green-500">{success}</p>}
-        </div>
-      </div>
+          )}
+          
+          {uploading && (
+            <div style={{ marginTop: 16 }}>
+              <Progress percent={uploadProgress} status="active" />
+            </div>
+          )}
+          
+          <ActionContainer>
+            <Space>
+              <Button
+                onClick={handleRemove}
+                disabled={uploading || !file}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleUpload}
+                disabled={uploading || !file || isUploaded}
+                loading={uploading}
+                icon={<UploadOutlined />}
+              >
+                {uploading ? 'Uploading' : 'Upload'}
+              </Button>
+            </Space>
+          </ActionContainer>
+          
+          {success && (
+            <MessageContainer>
+              <Text type="success" style={{ display: 'block', textAlign: 'center' }}>
+                {success}
+              </Text>
+            </MessageContainer>
+          )}
+        </StyledCard>
+      </UploadContainer>
     </>
   );
 };

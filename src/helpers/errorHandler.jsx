@@ -1,9 +1,31 @@
-import { Modal } from "antd";
+import { Modal, Button, message } from "antd";
+import { CopyOutlined } from "@ant-design/icons";
 
 export const showErrorDialog = (message) => {
+  const copyErrorToClipboard = () => {
+    try {
+      navigator.clipboard.writeText(message);
+      message.success("Error message copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy error message:", err);
+      message.error("Failed to copy error message");
+    }
+  };
+
   Modal.error({
     title: "An Error Occurred",
-    content: message,
+    content: (
+      <div>
+        <p style={{ marginBottom: 16 }}>{message}</p>
+        <Button 
+          type="text" 
+          icon={<CopyOutlined />} 
+          onClick={copyErrorToClipboard}
+        >
+          Copy error message
+        </Button>
+      </div>
+    ),
     okText: "OK",
     centered: true,
   });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Input, Select } from 'antd';
 
 const EditableCell = ({ 
@@ -11,15 +11,29 @@ const EditableCell = ({
   onSave,
   inputType = 'text'
 }) => {
-    const editable = record.id === editingKey && dataIndex === editingField;
+  const editable = record.id === editingKey && dataIndex === editingField;
+  
+  useEffect(() => {
+    // Debug log
+    if (editable) {
+      console.log('Rendering editable cell for:', record.id, dataIndex);
+      console.log('Current value:', record[dataIndex]);
+    }
+  }, [editable, record.id, dataIndex]);
+  
+  const handleChange = (value) => {
+    // Handle both direct value (for Select) and event target value (for Input)
+    const newValue = value?.target ? value.target.value : value;
+    onCellChange(newValue, record.id, dataIndex);
+  };
   
   const renderEditInput = () => {
     if (inputType === 'select') {
       return (
         <Select
           value={record[dataIndex]}
-          onChange={(value) => onCellChange(value, record.id, dataIndex)}
-          onBlur={onSave}
+          onChange={handleChange}
+          onBlur={() => onSave()}
           style={{ width: '100%' }}
           autoFocus
         >
@@ -33,33 +47,44 @@ const EditableCell = ({
     
     return (
       <Input
-        value={record[dataIndex]}
-        onChange={(e) => onCellChange(e.target.value, record.id, dataIndex)}
-        onBlur={onSave}
-        onPressEnter={onSave}
+        value={record[dataIndex] !== undefined ? record[dataIndex] : ''}
+        onChange={handleChange}
+        onBlur={() => onSave()}
+        onPressEnter={() => onSave()}
         autoFocus
+        placeholder={dataIndex === 'remarks' || dataIndex === 'tallyStatus' ? '' : 'Enter value'}
       />
     );
   };
 
+  // Special handling for remarks and tallyStatus - show blank if empty
+  const shouldShowPlaceholder = () => {
+    if (dataIndex === 'remarks' || dataIndex === 'tallyStatus') {
+      return false;
+    }
+    return true;
+  };
+
   return editable ? (
-    <div className="editable-cell-value-wrapper">
+    <div className="editable-cell-value-wrapper" style={{ background: '#fffbe6', padding: '5px' }}>
       {renderEditInput()}
     </div>
   ) : (
     <div 
-    className="editable-cell-value-wrapper"
-    onClick={(e) => {
-      e.stopPropagation();
-      onCellClick(record.id, dataIndex);
-    }}
-    style={{ cursor: 'pointer' }}
-  >
-    {record[dataIndex] ?? 'Click to edit'}
-  </div>
+      className="editable-cell-value-wrapper"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCellClick(record.id, dataIndex);
+      }}
+      style={{ cursor: 'pointer', padding: '5px' }}
+    >
+      {record[dataIndex] !== undefined && record[dataIndex] !== null && record[dataIndex] !== '' 
+        ? record[dataIndex] 
+        : shouldShowPlaceholder() 
+          ? <span style={{ color: '#ccc' }}>Click to edit</span> 
+          : ''}
+    </div>
   );
 };
 
-
-
-export default EditableCell;
+export default React.memo(EditableCell);

@@ -13,6 +13,7 @@ import axios from 'axios';
 import moment from 'moment';
 import _ from 'lodash';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 
 import Loader from '../components/Loader';
@@ -810,6 +811,7 @@ export default function Home() {
             isBulkDelete={deleteAll}
             billNo={selectedRowId.billNo}
           />
+          <Footer/>
         </>
       )}
     </>

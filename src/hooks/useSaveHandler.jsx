@@ -17,15 +17,22 @@ const EditableCell = ({
     // Debug log
     if (editable) {
       console.log('Rendering editable cell for:', record.id, dataIndex);
+      console.log('Current value:', record[dataIndex]);
     }
   }, [editable, record.id, dataIndex]);
+  
+  const handleChange = (value) => {
+    // Handle both direct value (for Select) and event target value (for Input)
+    const newValue = value?.target ? value.target.value : value;
+    onCellChange(newValue, record.id, dataIndex);
+  };
   
   const renderEditInput = () => {
     if (inputType === 'select') {
       return (
         <Select
           value={record[dataIndex]}
-          onChange={(value) => onCellChange(value, record.id, dataIndex)}
+          onChange={handleChange}
           onBlur={() => onSave()}
           style={{ width: '100%' }}
           autoFocus
@@ -40,11 +47,12 @@ const EditableCell = ({
     
     return (
       <Input
-        value={record[dataIndex]}
-        onChange={(e) => onCellChange(e.target.value, record.id, dataIndex)}
+        value={record[dataIndex] !== undefined ? record[dataIndex] : ''}
+        onChange={handleChange}
         onBlur={() => onSave()}
         onPressEnter={() => onSave()}
         autoFocus
+        placeholder="Enter value"
       />
     );
   };
@@ -62,7 +70,7 @@ const EditableCell = ({
       }}
       style={{ cursor: 'pointer', padding: '5px' }}
     >
-      {record[dataIndex] !== undefined && record[dataIndex] !== null 
+      {record[dataIndex] !== undefined && record[dataIndex] !== null && record[dataIndex] !== '' 
         ? record[dataIndex] 
         : <span style={{ color: '#ccc' }}>Click to edit</span>}
     </div>

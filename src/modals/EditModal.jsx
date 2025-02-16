@@ -21,6 +21,7 @@ const EditModal = ({
 }) => {
   const [form] = Form.useForm();
   const [localAddBill, setLocalAddBill] = useState(addBill);
+  const [sortedBillsHistory, setSortedBillsHistory] = useState([]);
   
   // Reset form when modal opens with new data
   useEffect(() => {
@@ -33,6 +34,26 @@ const EditModal = ({
       setLocalAddBill(addBill);
     }
   }, [isOpen, addBill, form]);
+
+  // Sort bills history by updatedAt date when BillsHistory changes
+  useEffect(() => {
+    if (BillsHistory && BillsHistory.length > 0) {
+      const sorted = [...BillsHistory]
+        .filter(bill => 
+          !bill.hasOwnProperty('chequeNumber') && 
+          !bill.hasOwnProperty('bankName')
+        )
+        .sort((a, b) => {
+          // Convert dates for comparison, fallback to createdAt if updatedAt doesn't exist
+          const dateA = a.updatedAt ? moment(a.updatedAt) : moment(a.date);
+          const dateB = b.updatedAt ? moment(b.updatedAt) : moment(b.date);
+          return dateB - dateA; // Most recent first
+        });
+      setSortedBillsHistory(sorted);
+    } else {
+      setSortedBillsHistory([]);
+    }
+  }, [BillsHistory]);
 
   const handleAddBillChange = (e) => {
     const { id, value } = e.target;
@@ -69,37 +90,85 @@ const EditModal = ({
   };
 
   // Helper function to extract username from "username":xxx format
-  const extractUsername = (createdByField) => {
-    if (!createdByField) return '';
+  const extractUsername = (userField) => {
+    if (!userField) return '';
     
     // Try to parse if it's a string in JSON format
-    if (typeof createdByField === 'string') {
+    if (typeof userField === 'string') {
       try {
         // Check if it matches the pattern "username":xxx
-        const match = createdByField.match(/"username":\s*"([^"]+)"/);
+        const match = userField.match(/"username":\s*"([^"]+)"/);
         if (match && match[1]) {
           return match[1];
         }
         
         // Try parsing as JSON if it's a complete JSON object
-        const parsed = JSON.parse(createdByField);
+        const parsed = JSON.parse(userField);
         if (parsed && parsed.username) {
           return parsed.username;
         }
       } catch (e) {
         // If parsing fails, return the original string
-        return createdByField;
+        return userField;
       }
     }
     
     // If it's already an object with username property
-    if (typeof createdByField === 'object' && createdByField.username) {
-      return createdByField.username;
+    if (typeof userField === 'object' && userField.username) {
+      return userField.username;
     }
     
     // Fallback to the original value
-    return String(createdByField);
+    return String(userField);
   };
+
+  const tableColumns = [
+    { 
+      title: 'Date', 
+      dataIndex: 'date', 
+      render: (text) => moment(text).format('DD/MM/YYYY'), 
+      width: 100 
+    },
+    { 
+      title: 'Amount', 
+      dataIndex: 'receivedAmount', 
+      width: 90, 
+      render: (value) => <Text strong>₹{value}</Text> 
+    },
+    { 
+      title: 'Method', 
+      dataIndex: 'paymentMethod', 
+      width: 120,
+      render: (method) => (
+        <Tag color={getPaymentMethodColor(method)}>
+          {method.replace(/_/g, ' ')}
+        </Tag>
+      )
+    },
+    { 
+      title: 'Comments', 
+      dataIndex: 'comments', 
+      width: 150,  // Added fixed width
+      ellipsis: { showTitle: true },  // Show tooltip on hover
+      render: (text) => text || '-'
+    },
+    { 
+      title: 'Updated By', 
+      dataIndex: 'updatedBy', 
+      width: 100,
+      ellipsis: true,
+      render: (updatedBy, record) => extractUsername(updatedBy || record.createdBy)
+    },
+    { 
+      title: 'Updated At', 
+      dataIndex: 'updatedAt', 
+      width: 150,
+      render: (text, record) => {
+        const date = text || record.date;
+        return date ? moment(date).format('DD/MM/YYYY hh:mm a') : '';
+      }
+    }
+  ];
 
   return (
     <Modal
@@ -114,7 +183,7 @@ const EditModal = ({
           Save Changes
         </Button>
       ]}
-      width={720}
+      width={800}  // Increased width to give more space
       destroyOnClose
       bodyStyle={{ padding: '16px 24px', maxHeight: '70vh', overflowY: 'auto' }}
     >
@@ -252,53 +321,17 @@ const EditModal = ({
           </Text>
         </Divider>
 
-        <Table
-          dataSource={BillsHistory.filter(bill => 
-            !bill.hasOwnProperty('chequeNumber') && 
-            !bill.hasOwnProperty('bankName')
-          )}
-          columns={[
-            { 
-              title: 'Date', 
-              dataIndex: 'date', 
-              render: (text) => moment(text).format('DD/MM/YYYY'), 
-              width: 100 
-            },
-            { 
-              title: 'Amount', 
-              dataIndex: 'receivedAmount', 
-              width: 90, 
-              render: (value) => <Text strong>₹{value}</Text> 
-            },
-            { 
-              title: 'Method', 
-              dataIndex: 'paymentMethod', 
-              width: 120,
-              render: (method) => (
-                <Tag color={getPaymentMethodColor(method)}>
-                  {method.replace(/_/g, ' ')}
-                </Tag>
-              )
-            },
-            { 
-              title: 'Comments', 
-              dataIndex: 'comments', 
-              ellipsis: true 
-            },
-            { 
-              title: 'Created By', 
-              dataIndex: 'createdBy', 
-              width: 120,
-              ellipsis: true,
-              render: (createdBy) => extractUsername(createdBy)
-            }
-          ]}
-          pagination={false}
-          scroll={{ y: 200 }}
-          size="small"
-          bordered
-          rowKey={(record) => `${record.date}-${record.receivedAmount}`}
-        />
+        <div className="table-container" style={{ overflow: 'auto' }}>
+          <Table
+            dataSource={sortedBillsHistory}
+            columns={tableColumns}
+            pagination={false}
+            scroll={{ y: 200, x: 'max-content' }}  // Added horizontal scrolling
+            size="small"
+            bordered
+            rowKey={(record, index) => `${record.date}-${record.receivedAmount}-${index}`}
+          />
+        </div>
       </Form>
     </Modal>
   );
