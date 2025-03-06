@@ -16,6 +16,7 @@ const ChequeModal = ({
   const [editingChequeIndex, setEditingChequeIndex] = useState(null);
   
   const initialChequeState = {
+    chequeId: 0,
     bankName: "",
     chequeNumber: "",
     chequeDate: null,
@@ -73,6 +74,7 @@ const ChequeModal = ({
     }
 
     const newCheque = {
+      chequeId: chequeData.chequeId,
       bankName: chequeData.bankName,
       chequeNumber: chequeData.chequeNumber,
       chequeDate: chequeData.chequeDate,
@@ -135,6 +137,7 @@ const ChequeModal = ({
 
   const startEdit = (cheque, index) => {
     setChequeData({
+      chequeId : cheque.chequeId,
       bankName: cheque.bankName,
       chequeNumber: cheque.chequeNumber,
       chequeDate: cheque.chequeDate,
